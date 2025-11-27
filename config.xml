@@ -10,14 +10,11 @@
         Apache Cordova Team
     </author>
 
-    <!-- Uygulama başlangıç dosyası -->
     <content src="web/index.html" />
 
-    <!-- İnternet izinleri -->
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
 
-    <!-- Splash -->
     <preference name="SplashScreenDelay" value="3000" />
     <preference name="AutoHideSplashScreen" value="true" />
     <preference name="FadeSplashScreen" value="true" />
@@ -26,28 +23,11 @@
     <preference name="AndroidWindowSplashScreenBackground" value="#ffffff" />
     <preference name="AndroidPostSplashScreenTheme" value="@style/Theme.AppCompat.NoActionBar"/>
 
-    <!-- ANDROID PLATFORM AYARLARI -->
     <platform name="android">
-
-        <!-- Uygulama İkonu -->
         <icon src="res/android/icon.png" />
-
-        <!-- Splash Görselleri -->
         <splash src="res/screen/android/splash.png" density="xxxhdpi"/>
-
-        <!-- 📌 TAM DOSYA ERİŞİM İZİNLERİ (HATASIZ) -->
-        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest">
-            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-        </edit-config>
-
-        <!-- SAF DOSYA ERİŞİMİ -->
-        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
-
     </platform>
 
-    <!-- Plug-in izinleri -->
     <plugin name="cordova-plugin-file" />
     <plugin name="cordova-plugin-android-permissions" />
 
