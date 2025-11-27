@@ -2,60 +2,180 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>PDF Listesi</title>
+<title>PDF Reader</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-    body { font-family: sans-serif; }
-    #pdfList { margin-top: 20px; }
-    .pdfItem {
-        padding: 10px;
-        border: 1px solid #ccc;
-        margin-bottom: 5px;
+    body { 
+        margin: 0; 
+        font-family: sans-serif;
+        background: #f4f4f4;
+    }
+
+    .topbar {
+        width: 100%;
+        background: #1e88e5;
+        color: white;
+        padding: 15px;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .tabs {
+        display: flex;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .tab {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
         cursor: pointer;
+        font-size: 16px;
+    }
+
+    .activeTab {
+        background: #1e88e5;
+        color: white;
+    }
+
+    #pdfList, #recentList {
+        padding: 15px;
+    }
+
+    .pdfItem {
+        background: #fff;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        border: 1px solid #ddd;
+        cursor: pointer;
+    }
+
+    .btn {
+        margin: 15px;
+        padding: 12px;
+        background: #1e88e5;
+        color: white;
+        text-align: center;
         border-radius: 6px;
     }
 </style>
 </head>
+
 <body>
 
-<h2>PDF Yükle</h2>
-<input type="file" id="pdfInput" accept="application/pdf" />
+<div class="topbar">PDF Reader</div>
 
-<h3>PDF Listesi</h3>
+<div class="tabs">
+    <div id="tabDevice" class="tab activeTab">Cihazımda</div>
+    <div id="tabRecent" class="tab">Son Kullanılanlar</div>
+</div>
+
+<div id="permissionBtn" class="btn">📂 Tüm Dosya Erişim İznini Aç</div>
+
 <div id="pdfList"></div>
-
+<div id="recentList" style="display:none"></div>
 
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    const input = document.getElementById("pdfInput");
-    const list = document.getElementById("pdfList");
+document.addEventListener("deviceready", () => {
+    const tabDevice = document.getElementById("tabDevice");
+    const tabRecent = document.getElementById("tabRecent");
+    const pdfList = document.getElementById("pdfList");
+    const recentList = document.getElementById("recentList");
+    const permissionBtn = document.getElementById("permissionBtn");
 
-    // PDF seçilince listeye ekle
-    input.addEventListener("change", () => {
-        const file = input.files[0];
-        if (!file) return;
+    // ---- TAB SYSTEM ----
+    tabDevice.onclick = () => {
+        tabDevice.classList.add("activeTab");
+        tabRecent.classList.remove("activeTab");
+        pdfList.style.display = "block";
+        recentList.style.display = "none";
+    };
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const base64Data = e.target.result.split(",")[1];
+    tabRecent.onclick = () => {
+        tabRecent.classList.add("activeTab");
+        tabDevice.classList.remove("activeTab");
+        pdfList.style.display = "none";
+        recentList.style.display = "block";
+        loadRecent();
+    };
 
-            const item = document.createElement("div");
-            item.className = "pdfItem";
-            item.textContent = file.name;
+    // ---- PDF TARAYICI ----
+    async function scanPDFs() {
+        pdfList.innerHTML = "<div class='pdfItem'>Taranıyor...</div>";
 
-            // Tıklayınca viewer.html'a PDF verisini gönder
-            item.onclick = () => {
-                sessionStorage.setItem("selectedPdf", base64Data);
-                sessionStorage.setItem("pdfFilename", file.name);
+        window.resolveLocalFileSystemURL("file:///storage/emulated/0/", dir => {
+            const reader = dir.createReader();
+            reader.readEntries(entries => {
+                pdfList.innerHTML = "";
+                entries.forEach(e => {
+                    if (e.isFile && e.name.toLowerCase().endsWith(".pdf")) {
+                        const div = document.createElement("div");
+                        div.className = "pdfItem";
+                        div.textContent = e.name;
 
-                window.location.href = "viewer.html";
-            };
+                        div.onclick = () => openPDF(e.nativeURL);
 
-            list.appendChild(item);
-        };
+                        pdfList.appendChild(div);
+                    }
+                });
 
-        reader.readAsDataURL(file);
-    });
+                if (!pdfList.innerHTML.trim()) {
+                    pdfList.innerHTML = "<div class='pdfItem'>PDF bulunamadı.</div>";
+                }
+            });
+        });
+    }
+
+    // ---- PDF AÇICI ----
+    function openPDF(path) {
+        let recent = JSON.parse(localStorage.getItem("recent") || "[]");
+
+        recent.unshift({ name: path.split("/").pop(), path });
+
+        recent = recent.slice(0, 20); // son 20 kaydı tut
+        localStorage.setItem("recent", JSON.stringify(recent));
+
+        sessionStorage.setItem("pdfPath", path);
+        window.location.href = "viewer.html";
+    }
+
+    // ---- SON KULLANILANLAR ----
+    function loadRecent() {
+        const data = JSON.parse(localStorage.getItem("recent") || "[]");
+        recentList.innerHTML = "";
+
+        if (data.length === 0) {
+            recentList.innerHTML = "<div class='pdfItem'>Kayıt yok.</div>";
+            return;
+        }
+
+        data.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "pdfItem";
+            div.textContent = item.name;
+
+            div.onclick = () => openPDF(item.path);
+
+            recentList.appendChild(div);
+        });
+    }
+
+    // ---- TÜM DOSYA ERİŞİM İZNİ ----
+    permissionBtn.onclick = () => {
+        cordova.plugins.diagnostic.requestExternalStorageAuthorization(status => {
+            if (status === "GRANTED" || status === "GRANTED_WHEN_IN_USE") {
+                scanPDFs();
+            } else {
+                cordova.plugins.diagnostic.switchToSettings();
+            }
+        }, err => alert(err));
+    };
+
 });
 </script>
 
