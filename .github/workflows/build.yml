@@ -1,53 +1,68 @@
-name: Build Debug APK
+name: Build Android APK
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # Template indir
-      - name: Download Capacitor Remix Template
-        run: |
-          curl -L https://github.com/ionic-team/capacitor-remix-templates/archive/refs/heads/main.zip -o template.zip
-          unzip template.zip -d template
-          
-          # Zip içindeki klasör adını otomatik bul
-          TDIR=$(ls template)
-          
-          # Doğru klasörü project adıyla taşı
-          mv "template/$TDIR" project
-          
-          rm -rf template template.zip
-
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install Dependencies
+      - name: Install Capacitor project
         run: |
-          cd project
+          mkdir app
+          cd app
+          
+          # package.json oluştur
+          cat << 'EOF' > package.json
+          {
+            "name": "pdfapp",
+            "version": "1.0.0",
+            "private": true,
+            "scripts": {
+              "build": "echo 'skip'",
+              "sync": "npx cap sync"
+            },
+            "dependencies": {
+              "@capacitor/android": "6.1.0",
+              "@capacitor/core": "6.1.0"
+            }
+          }
+          EOF
+
+          # capacitor.config.ts oluştur
+          cat << 'EOF' > capacitor.config.ts
+          import { CapacitorConfig } from '@capacitor/core';
+          const config: CapacitorConfig = {
+            appId: 'com.dev.pdf',
+            appName: 'PDF Reader',
+            webDir: 'web'
+          };
+          export default config;
+          EOF
+
+          mkdir web
+          cp -r ../web/* ./web/
+
           npm install
+          npx cap add android
 
-      - name: Capacitor Sync Android
+      - name: Build Android
         run: |
-          cd project
-          npx cap sync android
-
-      - name: Build Debug APK
-        run: |
-          cd project/android
-          chmod +x gradlew
+          cd app/android
           ./gradlew assembleDebug
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: project/android/app/build/outputs/apk/debug/app-debug.apk
+          name: debug-apk
+          path: app/android/app/build/outputs/apk/debug/*.apk
