@@ -6,10 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-    body { 
-        margin: 0; 
+    body {
+        margin: 0;
         font-family: sans-serif;
-        background: #f4f4f4;
+        background: #f0f0f0;
     }
 
     .topbar {
@@ -46,10 +46,10 @@
     }
 
     .pdfItem {
-        background: #fff;
+        background: white;
         padding: 12px;
+        margin-bottom: 10px;
         border-radius: 6px;
-        margin-bottom: 8px;
         border: 1px solid #ddd;
         cursor: pointer;
     }
@@ -61,6 +61,7 @@
         color: white;
         text-align: center;
         border-radius: 6px;
+        cursor: pointer;
     }
 </style>
 </head>
@@ -74,11 +75,10 @@
     <div id="tabRecent" class="tab">Son Kullanılanlar</div>
 </div>
 
-<div id="permissionBtn" class="btn">📂 Tüm Dosya Erişim İznini Aç</div>
+<div id="permissionBtn" class="btn">📂 Klasör Seç ve Tara</div>
 
 <div id="pdfList"></div>
 <div id="recentList" style="display:none"></div>
-
 
 <script>
 document.addEventListener("deviceready", () => {
@@ -88,7 +88,7 @@ document.addEventListener("deviceready", () => {
     const recentList = document.getElementById("recentList");
     const permissionBtn = document.getElementById("permissionBtn");
 
-    // ---- TAB SYSTEM ----
+    // --- TAB SYSTEM ---
     tabDevice.onclick = () => {
         tabDevice.classList.add("activeTab");
         tabRecent.classList.remove("activeTab");
@@ -104,47 +104,67 @@ document.addEventListener("deviceready", () => {
         loadRecent();
     };
 
-    // ---- PDF TARAYICI ----
-    async function scanPDFs() {
+    // --- KLASÖR SEÇTİRME ---
+    permissionBtn.onclick = () => {
+        window.plugins.intentShim.startActivityForResult({
+            action: "android.intent.action.OPEN_DOCUMENT_TREE"
+        }, result => {
+            if (result.resultCode === 1) {
+                scanSelectedFolder(result.data);
+            } else {
+                alert("Klasör seçilmedi!");
+            }
+        }, err => alert(JSON.stringify(err)));
+    };
+
+    // --- PDF TARAYICI ---
+    function scanSelectedFolder(uri) {
         pdfList.innerHTML = "<div class='pdfItem'>Taranıyor...</div>";
 
-        window.resolveLocalFileSystemURL("file:///storage/emulated/0/", dir => {
-            const reader = dir.createReader();
-            reader.readEntries(entries => {
-                pdfList.innerHTML = "";
-                entries.forEach(e => {
-                    if (e.isFile && e.name.toLowerCase().endsWith(".pdf")) {
-                        const div = document.createElement("div");
-                        div.className = "pdfItem";
-                        div.textContent = e.name;
+        if (!cordova.plugins.filepicker) {
+            pdfList.innerHTML = "<div class='pdfItem'>filepicker plugin eksik!</div>";
+            return;
+        }
 
-                        div.onclick = () => openPDF(e.nativeURL);
+        cordova.plugins.filepicker.list({ uri: uri }, files => {
+            pdfList.innerHTML = "";
 
-                        pdfList.appendChild(div);
-                    }
-                });
+            files.forEach(f => {
+                if (f.name.toLowerCase().endsWith(".pdf")) {
+                    const div = document.createElement("div");
+                    div.className = "pdfItem";
+                    div.textContent = f.name;
 
-                if (!pdfList.innerHTML.trim()) {
-                    pdfList.innerHTML = "<div class='pdfItem'>PDF bulunamadı.</div>";
+                    div.onclick = () => openPDF(f.uri);
+
+                    pdfList.appendChild(div);
                 }
             });
+
+            if (!pdfList.innerHTML.trim()) {
+                pdfList.innerHTML = "<div class='pdfItem'>PDF bulunamadı.</div>";
+            }
+
+        }, err => {
+            pdfList.innerHTML = "<div class='pdfItem'>Hata: " + JSON.stringify(err) + "</div>";
         });
     }
 
-    // ---- PDF AÇICI ----
-    function openPDF(path) {
+    // --- PDF AÇICI ---
+    function openPDF(uri) {
         let recent = JSON.parse(localStorage.getItem("recent") || "[]");
-
-        recent.unshift({ name: path.split("/").pop(), path });
-
-        recent = recent.slice(0, 20); // son 20 kaydı tut
+        recent.unshift({
+            name: uri.split("/").pop(),
+            path: uri
+        });
+        recent = recent.slice(0, 20);
         localStorage.setItem("recent", JSON.stringify(recent));
 
-        sessionStorage.setItem("pdfPath", path);
+        sessionStorage.setItem("pdfPath", uri);
         window.location.href = "viewer.html";
     }
 
-    // ---- SON KULLANILANLAR ----
+    // --- SON KULLANILANLAR ---
     function loadRecent() {
         const data = JSON.parse(localStorage.getItem("recent") || "[]");
         recentList.innerHTML = "";
@@ -158,24 +178,10 @@ document.addEventListener("deviceready", () => {
             const div = document.createElement("div");
             div.className = "pdfItem";
             div.textContent = item.name;
-
             div.onclick = () => openPDF(item.path);
-
             recentList.appendChild(div);
         });
     }
-
-    // ---- TÜM DOSYA ERİŞİM İZNİ ----
-    permissionBtn.onclick = () => {
-        cordova.plugins.diagnostic.requestExternalStorageAuthorization(status => {
-            if (status === "GRANTED" || status === "GRANTED_WHEN_IN_USE") {
-                scanPDFs();
-            } else {
-                cordova.plugins.diagnostic.switchToSettings();
-            }
-        }, err => alert(err));
-    };
-
 });
 </script>
 
