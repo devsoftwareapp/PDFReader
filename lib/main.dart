@@ -3,15 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path/path.dart' as p;
-import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  if (Platform.isAndroid) {
-    await InAppWebViewController.setWebContentsDebuggingEnabled(true);
-  }
+  await InAppWebViewController.setWebContentsDebuggingEnabled(true);
   
   runApp(PdfManagerApp());
 }
@@ -38,50 +36,111 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<String> _pdfFiles = [];
-  String? _currentPath;
+  bool _isLoading = false;
+  bool _permissionGranted = false;
 
   @override
   void initState() {
     super.initState();
-    _initDir();
+    _checkPermission();
   }
 
-  Future<void> _initDir() async {
-    _currentPath = (await getApplicationDocumentsDirectory()).path;
-    _scanFiles();
-  }
-
-  Future<void> _scanFiles() async {
-    if (_currentPath == null) return;
+  Future<void> _checkPermission() async {
+    var status = await Permission.storage.status;
+    setState(() {
+      _permissionGranted = status.isGranted;
+    });
     
-    final dir = Directory(_currentPath!);
-    if (await dir.exists()) {
-      final entities = dir.listSync();
-      final pdfPaths = entities
-          .where((e) => e is File && e.path.toLowerCase().endsWith('.pdf'))
-          .map((e) => e.path)
-          .toList();
-      
-      setState(() => _pdfFiles = pdfPaths);
+    if (_permissionGranted) {
+      _scanDeviceForPdfs();
     }
   }
 
-  Future<void> _importFile() async {
-    final res = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
+  Future<void> _requestPermission() async {
+    var status = await Permission.storage.request();
+    setState(() {
+      _permissionGranted = status.isGranted;
+    });
     
-    if (res != null && res.files.single.path != null) {
-      final path = res.files.single.path!;
-      final imported = File(path);
-      final newPath = p.join(_currentPath!, p.basename(path));
-      await imported.copy(newPath);
-      _scanFiles();
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('PDF imported: ${p.basename(path)}')),
-      );
+    if (status.isGranted) {
+      _scanDeviceForPdfs();
+    } else if (status.isPermanentlyDenied) {
+      _showPermissionDialog();
+    }
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Dosya Erişim İzni Gerekli'),
+        content: const Text('Tüm PDF dosyalarını listelemek için dosya erişim izni gerekiyor. Ayarlardan izin verebilirsiniz.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Vazgeç'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Ayarlara Git'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _scanDeviceForPdfs() async {
+    setState(() {
+      _isLoading = true;
+      _pdfFiles.clear();
+    });
+
+    try {
+      // Android'de yaygın PDF klasörleri
+      final commonPaths = [
+        '/storage/emulated/0/Download',
+        '/storage/emulated/0/Documents',
+        '/storage/emulated/0/DCIM',
+        '/storage/emulated/0/Pictures',
+        (await getExternalStorageDirectory())?.path,
+        (await getDownloadsDirectory())?.path,
+      ];
+
+      for (var path in commonPaths) {
+        if (path != null) {
+          await _scanDirectory(path);
+        }
+      }
+    } catch (e) {
+      print('Scan error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _scanDirectory(String dirPath) async {
+    try {
+      final dir = Directory(dirPath);
+      if (await dir.exists()) {
+        final entities = dir.listSync(recursive: true);
+        
+        for (var entity in entities) {
+          if (entity is File && entity.path.toLowerCase().endsWith('.pdf')) {
+            if (!_pdfFiles.contains(entity.path)) {
+              setState(() {
+                _pdfFiles.add(entity.path);
+              });
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Directory scan error for $dirPath: $e');
     }
   }
 
@@ -90,7 +149,7 @@ class _HomePageState extends State<HomePage> {
       final file = File(path);
       if (!await file.exists()) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File not found: ${p.basename(path)}')),
+          SnackBar(content: Text('Dosya bulunamadı: ${p.basename(path)}')),
         );
         return;
       }
@@ -106,7 +165,7 @@ class _HomePageState extends State<HomePage> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error opening PDF: $e')),
+        SnackBar(content: Text('PDF açılırken hata: $e')),
       );
     }
   }
@@ -114,21 +173,85 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('PDF Reader')),
-      body: _pdfFiles.isEmpty
-          ? const Center(child: Text('No PDF files found'))
-          : ListView.builder(
-              itemCount: _pdfFiles.length,
-              itemBuilder: (_, i) => ListTile(
-                leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
-                title: Text(p.basename(_pdfFiles[i])),
-                onTap: () => _openViewer(_pdfFiles[i]),
-              ),
+      appBar: AppBar(title: const Text('Cihaz')),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (!_permissionGranted) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.folder_open, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Tüm Dosya Erişim İzni Gerekli',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _importFile,
-        backgroundColor: Colors.red,
-        child: const Icon(Icons.add, color: Colors.white),
+            const SizedBox(height: 8),
+            const Text(
+              'Cihazınızdaki tüm PDF dosyalarını listelemek için\nizin vermeniz gerekiyor.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _requestPermission,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: const Text('Tüm Dosya Erişim İzni Ver'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Colors.red),
+            SizedBox(height: 16),
+            Text('PDF dosyaları taranıyor...'),
+          ],
+        ),
+      );
+    }
+
+    if (_pdfFiles.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.search_off, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'PDF dosyası bulunamadı',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _scanDeviceForPdfs,
+              child: const Text('Yeniden Tara'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: _pdfFiles.length,
+      itemBuilder: (_, i) => ListTile(
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
+        title: Text(p.basename(_pdfFiles[i])),
+        subtitle: Text(_pdfFiles[i]),
+        onTap: () => _openViewer(_pdfFiles[i]),
       ),
     );
   }
@@ -193,7 +316,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                 children: [
                   CircularProgressIndicator(color: Colors.red),
                   SizedBox(height: 20),
-                  Text('Loading PDF...'),
+                  Text('PDF Yükleniyor...'),
                 ],
               ),
             ),
