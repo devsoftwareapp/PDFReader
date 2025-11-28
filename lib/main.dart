@@ -30,6 +30,143 @@ Future<Map<String, dynamic>?> _getInitialIntent() async {
   }
 }
 
+// Tema yönetimi için
+enum AppTheme { red, blue, green, purple, orange }
+
+class ThemeManager with ChangeNotifier {
+  AppTheme _currentTheme = AppTheme.red;
+
+  AppTheme get currentTheme => _currentTheme;
+
+  void setTheme(AppTheme theme) {
+    _currentTheme = theme;
+    notifyListeners();
+  }
+
+  ThemeData get themeData {
+    switch (_currentTheme) {
+      case AppTheme.blue:
+        return _blueTheme;
+      case AppTheme.green:
+        return _greenTheme;
+      case AppTheme.purple:
+        return _purpleTheme;
+      case AppTheme.orange:
+        return _orangeTheme;
+      case AppTheme.red:
+      default:
+        return _redTheme;
+    }
+  }
+
+  static final ThemeData _redTheme = ThemeData(
+    primarySwatch: Colors.red,
+    primaryColor: Color(0xFFD32F2F),
+    scaffoldBackgroundColor: Colors.white,
+    appBarTheme: AppBarTheme(
+      backgroundColor: Color(0xFFD32F2F),
+      foregroundColor: Colors.white,
+      elevation: 2,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Color(0xFFD32F2F),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Color(0xFFD32F2F),
+      unselectedItemColor: Colors.grey,
+    ),
+    tabBarTheme: TabBarTheme(
+      labelColor: Color(0xFFD32F2F),
+      unselectedLabelColor: Colors.grey,
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
+      ),
+    ),
+    cardTheme: CardTheme(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+  );
+
+  static final ThemeData _blueTheme = ThemeData(
+    primarySwatch: Colors.blue,
+    primaryColor: Color(0xFF1976D2),
+    scaffoldBackgroundColor: Colors.white,
+    appBarTheme: AppBarTheme(
+      backgroundColor: Color(0xFF1976D2),
+      foregroundColor: Colors.white,
+      elevation: 2,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Color(0xFF1976D2),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Color(0xFF1976D2),
+    ),
+  );
+
+  static final ThemeData _greenTheme = ThemeData(
+    primarySwatch: Colors.green,
+    primaryColor: Color(0xFF388E3C),
+    scaffoldBackgroundColor: Colors.white,
+    appBarTheme: AppBarTheme(
+      backgroundColor: Color(0xFF388E3C),
+      foregroundColor: Colors.white,
+      elevation: 2,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Color(0xFF388E3C),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Color(0xFF388E3C),
+    ),
+  );
+
+  static final ThemeData _purpleTheme = ThemeData(
+    primarySwatch: Colors.purple,
+    primaryColor: Color(0xFF7B1FA2),
+    scaffoldBackgroundColor: Colors.white,
+    appBarTheme: AppBarTheme(
+      backgroundColor: Color(0xFF7B1FA2),
+      foregroundColor: Colors.white,
+      elevation: 2,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Color(0xFF7B1FA2),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Color(0xFF7B1FA2),
+    ),
+  );
+
+  static final ThemeData _orangeTheme = ThemeData(
+    primarySwatch: Colors.orange,
+    primaryColor: Color(0xFFF57C00),
+    scaffoldBackgroundColor: Colors.white,
+    appBarTheme: AppBarTheme(
+      backgroundColor: Color(0xFFF57C00),
+      foregroundColor: Colors.white,
+      elevation: 2,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Color(0xFFF57C00),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Color(0xFFF57C00),
+    ),
+  );
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -37,50 +174,27 @@ void main() async {
   
   final initialIntent = await _getInitialIntent();
   
-  runApp(PdfManagerApp(initialIntent: initialIntent));
+  runApp(MyApp(initialIntent: initialIntent));
 }
 
-class PdfManagerApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   final Map<String, dynamic>? initialIntent;
 
-  const PdfManagerApp({super.key, this.initialIntent});
+  const MyApp({super.key, this.initialIntent});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PDF Reader',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: Color(0xFF2196F3), // Açık mavi
-        scaffoldBackgroundColor: Color(0xFFF8F9FA),
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Color(0xFF2196F3),
-          elevation: 1,
-          titleTextStyle: TextStyle(
-            color: Color(0xFF2196F3),
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-          iconTheme: IconThemeData(color: Color(0xFF2196F3)),
-        ),
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFF2196F3),
-          foregroundColor: Colors.white,
-        ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          selectedItemColor: Color(0xFF2196F3),
-          unselectedItemColor: Colors.grey,
-        ),
-        tabBarTheme: TabBarTheme(
-          labelColor: Color(0xFF2196F3),
-          unselectedLabelColor: Colors.grey,
-          indicator: UnderlineTabIndicator(
-            borderSide: BorderSide(width: 2.0, color: Color(0xFF2196F3)),
-          ),
-        ),
+    return ChangeNotifierProvider(
+      create: (context) => ThemeManager(),
+      child: Consumer<ThemeManager>(
+        builder: (context, themeManager, child) {
+          return MaterialApp(
+            title: 'PDF Reader',
+            theme: themeManager.themeData,
+            home: HomePage(initialIntent: initialIntent),
+          );
+        },
       ),
-      home: HomePage(initialIntent: initialIntent),
     );
   }
 }
@@ -98,13 +212,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   List<String> _pdfFiles = [];
   List<String> _favoriteFiles = [];
   List<String> _recentFiles = [];
+  List<String> _searchHistory = [];
   bool _isLoading = false;
   bool _permissionGranted = false;
   int _currentTabIndex = 0;
   int _currentHomeTabIndex = 0;
   late TabController _tabController;
   bool _isFabOpen = false;
+  bool _isSearchMode = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   // Veritabanı için
   Database? _database;
@@ -120,6 +238,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _tabController.addListener(_handleTabChange);
     _initDatabase();
     _checkPermission();
+    _loadSearchHistory();
     
     // Intent listener'ı kur
     _intentChannel.setMethodCallHandler(_handleIntentMethodCall);
@@ -149,6 +268,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             opened_date TEXT
           )
         ''');
+        await db.execute('''
+          CREATE TABLE search_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            query TEXT UNIQUE,
+            searched_date TEXT
+          )
+        ''');
       },
     );
     await _loadFavorites();
@@ -171,6 +297,40 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     setState(() {
       _recentFiles = List.generate(maps.length, (i) => maps[i]['file_path']);
     });
+  }
+
+  Future<void> _loadSearchHistory() async {
+    if (_database == null) return;
+    
+    final List<Map<String, dynamic>> maps = await _database!.query(
+      'search_history',
+      orderBy: 'searched_date DESC',
+      limit: 10
+    );
+    setState(() {
+      _searchHistory = List.generate(maps.length, (i) => maps[i]['query']);
+    });
+  }
+
+  Future<void> _addToSearchHistory(String query) async {
+    if (_database == null) return;
+    
+    await _database!.insert(
+      'search_history',
+      {
+        'query': query,
+        'searched_date': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await _loadSearchHistory();
+  }
+
+  Future<void> _clearSearchHistory() async {
+    if (_database == null) return;
+    
+    await _database!.delete('search_history');
+    await _loadSearchHistory();
   }
 
   Future<void> _addToFavorites(String filePath) async {
@@ -351,7 +511,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Dosya Erişim İzni Gerekli', style: TextStyle(color: Color(0xFF2196F3))),
+        title: Text('Dosya Erişim İzni Gerekli', style: TextStyle(color: Color(0xFFD32F2F))),
         content: Text('Tüm PDF dosyalarını listelemek için dosya erişim izni gerekiyor. Ayarlardan izin verebilirsiniz.'),
         actions: [
           TextButton(
@@ -359,7 +519,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             child: Text('Vazgeç'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF2196F3)),
+            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
             onPressed: () {
               Navigator.pop(context);
               openAppSettings();
@@ -491,13 +651,105 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
+  Future<void> _copyFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      final fileName = p.basename(filePath);
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final newPath = '${appDocDir.path}/$fileName';
+      
+      await file.copy(newPath);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Dosya kopyalandı: $fileName')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kopyalama hatası: $e')),
+      );
+    }
+  }
+
+  Future<void> _deleteFile(String filePath) async {
+    final fileName = p.basename(filePath);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Dosyayı Sil'),
+        content: Text('"$fileName" dosyasını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('İptal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                final file = File(filePath);
+                await file.delete();
+                
+                setState(() {
+                  _pdfFiles.remove(filePath);
+                  _favoriteFiles.remove(filePath);
+                  _recentFiles.remove(filePath);
+                });
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Dosya silindi: $fileName')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Silme hatası: $e')),
+                );
+              }
+            },
+            child: Text('Sil', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _toggleFab() {
     setState(() {
       _isFabOpen = !_isFabOpen;
     });
   }
 
+  void _toggleSearchMode() {
+    setState(() {
+      _isSearchMode = !_isSearchMode;
+      if (!_isSearchMode) {
+        _searchController.clear();
+        _searchFocusNode.unfocus();
+      } else {
+        Future.delayed(Duration(milliseconds: 300), () {
+          _searchFocusNode.requestFocus();
+        });
+      }
+    });
+  }
+
+  void _performSearch(String query) {
+    if (query.trim().isNotEmpty) {
+      _addToSearchHistory(query.trim());
+    }
+    // Arama işlemi burada yapılacak
+    print('Arama yapılıyor: $query');
+  }
+
   Widget _buildHomeTabContent() {
+    List<String> displayedFiles = _pdfFiles;
+    final searchQuery = _searchController.text.trim().toLowerCase();
+    
+    if (_isSearchMode && searchQuery.isNotEmpty) {
+      displayedFiles = _pdfFiles.where((file) => 
+        p.basename(file).toLowerCase().contains(searchQuery)
+      ).toList();
+    }
+
     switch (_currentHomeTabIndex) {
       case 0: // Cihazda
         if (!_permissionGranted) {
@@ -506,10 +758,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         if (_isLoading) {
           return _buildLoadingState();
         }
-        if (_pdfFiles.isEmpty) {
+        if (displayedFiles.isEmpty) {
           return _buildEmptyState();
         }
-        return _buildPdfList(_pdfFiles);
+        return _buildPdfList(displayedFiles);
       case 1: // Son Kullanılanlar
         return _buildRecentFiles();
       case 2: // Favoriler
@@ -530,7 +782,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             SizedBox(height: 16),
             Text(
               'Dosyalarınıza Erişim İzni Verin',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2196F3)),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
             ),
             SizedBox(height: 8),
             Text(
@@ -542,7 +794,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ElevatedButton(
               onPressed: _requestPermission,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF2196F3),
+                backgroundColor: Color(0xFFD32F2F),
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
@@ -559,9 +811,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: Color(0xFF2196F3)),
+          CircularProgressIndicator(color: Color(0xFFD32F2F)),
           SizedBox(height: 16),
-          Text('PDF dosyaları taranıyor...', style: TextStyle(color: Color(0xFF2196F3))),
+          Text('PDF dosyaları taranıyor...', style: TextStyle(color: Color(0xFFD32F2F))),
         ],
       ),
     );
@@ -575,19 +827,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           Icon(Icons.search_off, size: 64, color: Colors.grey),
           SizedBox(height: 16),
           Text(
-            'PDF dosyası bulunamadı',
+            _isSearchMode && _searchController.text.isNotEmpty 
+                ? 'Arama sonucu bulunamadı'
+                : 'PDF dosyası bulunamadı',
             style: TextStyle(fontSize: 18, color: Colors.grey),
           ),
           SizedBox(height: 16),
           ElevatedButton(
             onPressed: _scanDeviceForPdfs,
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF2196F3)),
+            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
             child: Text('Yeniden Tara', style: TextStyle(color: Colors.white)),
           ),
           SizedBox(height: 8),
           TextButton(
             onPressed: _pickPdfFile,
-            child: Text('Dosya Seç', style: TextStyle(color: Color(0xFF2196F3))),
+            child: Text('Dosya Seç', style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
@@ -595,15 +849,74 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget _buildPdfList(List<String> files) {
-    return ListView.builder(
-      itemCount: files.length,
-      itemBuilder: (_, i) => _buildFileItem(files[i], false),
+    return Column(
+      children: [
+        if (_isSearchMode && _searchHistory.isNotEmpty)
+          _buildSearchHistory(),
+        Expanded(
+          child: ListView.builder(
+            itemCount: files.length,
+            itemBuilder: (_, i) => _buildFileItem(files[i], false),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchHistory() {
+    return Card(
+      margin: EdgeInsets.all(8),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Arama Geçmişi', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
+                TextButton(
+                  onPressed: _clearSearchHistory,
+                  child: Text('Temizle', style: TextStyle(color: Colors.grey)),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _searchHistory.map((query) => ActionChip(
+                label: Text(query),
+                onPressed: () {
+                  _searchController.text = query;
+                  _performSearch(query);
+                },
+                backgroundColor: Color(0xFFF5F5F5),
+                labelStyle: TextStyle(color: Color(0xFFD32F2F)),
+              )).toList(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildFileItem(String filePath, bool isFavorite) {
     final fileName = p.basename(filePath);
     final isFavorited = _favoriteFiles.contains(filePath);
+    final file = File(filePath);
+    final fileSize = file.existsSync() ? file.lengthSync() : 0;
+    final modifiedDate = file.existsSync() ? file.lastModifiedSync() : DateTime.now();
+
+    String formatFileSize(int bytes) {
+      if (bytes < 1024) return '$bytes B';
+      if (bytes < 1048576) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+      return '${(bytes / 1048576).toStringAsFixed(1)} MB';
+    }
+
+    String formatDate(DateTime date) {
+      return '${date.day}.${date.month}.${date.year} - ${date.hour}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}';
+    }
 
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -612,17 +925,27 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           width: 40,
           height: 50,
           decoration: BoxDecoration(
-            color: Color(0xFFE3F2FD),
+            color: Color(0xFFD32F2F),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(Icons.picture_as_pdf, color: Color(0xFF2196F3), size: 24),
+          child: Icon(Icons.picture_as_pdf, color: Colors.white, size: 24),
         ),
         title: Text(fileName, style: TextStyle(fontWeight: FontWeight.w500)),
-        subtitle: Text(
-          filePath.length > 50 ? '...${filePath.substring(filePath.length - 50)}' : filePath,
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              filePath.length > 50 ? '...${filePath.substring(filePath.length - 50)}' : filePath,
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 2),
+            Text(
+              '${formatFileSize(fileSize)} - ${formatDate(modifiedDate)}',
+              style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
         onTap: () => _openViewer(filePath),
         trailing: Row(
@@ -645,8 +968,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               onSelected: (value) => _handleFileAction(value, filePath),
               itemBuilder: (BuildContext context) => [
                 PopupMenuItem(value: 'share', child: Text('Paylaş')),
+                PopupMenuItem(value: 'rename', child: Text('Yeniden Adlandır')),
                 PopupMenuItem(value: 'print', child: Text('Yazdır')),
-                PopupMenuItem(value: 'open', child: Text('Dosyayı Aç')),
+                PopupMenuItem(value: 'copy', child: Text('Kopyala')),
+                PopupMenuItem(value: 'delete', child: Text('Sil', style: TextStyle(color: Colors.red))),
               ],
             ),
           ],
@@ -663,10 +988,67 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       case 'print':
         _printFile(filePath);
         break;
-      case 'open':
-        OpenFile.open(filePath);
+      case 'copy':
+        _copyFile(filePath);
+        break;
+      case 'delete':
+        _deleteFile(filePath);
+        break;
+      case 'rename':
+        _showRenameDialog(filePath);
         break;
     }
+  }
+
+  void _showRenameDialog(String filePath) {
+    final fileName = p.basename(filePath);
+    final TextEditingController renameController = TextEditingController(text: p.withoutExtension(fileName));
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Dosyayı Yeniden Adlandır'),
+        content: TextField(
+          controller: renameController,
+          decoration: InputDecoration(
+            labelText: 'Yeni dosya adı',
+            suffixText: '.pdf',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('İptal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
+            onPressed: () async {
+              final newName = '${renameController.text}.pdf';
+              final newPath = '${p.dirname(filePath)}/$newName';
+              
+              try {
+                await File(filePath).rename(newPath);
+                setState(() {
+                  final index = _pdfFiles.indexOf(filePath);
+                  if (index != -1) {
+                    _pdfFiles[index] = newPath;
+                  }
+                });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Dosya yeniden adlandırıldı')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Yeniden adlandırma hatası: $e')),
+                );
+              }
+            },
+            child: Text('Kaydet', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildRecentFiles() {
@@ -732,37 +1114,37 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       {
         'icon': Icons.edit, 
         'name': 'PDF Düzenle', 
-        'color': Color(0xFFE3F2FD), 
+        'color': Color(0xFFFFEBEE), 
         'onTap': () => _showComingSoon('PDF Düzenleme')
       },
       {
         'icon': Icons.volume_up, 
         'name': 'Sesli okuma', 
-        'color': Color(0xFFE8F5E8), 
+        'color': Color(0xFFF3E5F5), 
         'onTap': () => _showComingSoon('Sesli Okuma')
       },
       {
         'icon': Icons.edit_document, 
         'name': 'PDF Doldur & İmzala', 
-        'color': Color(0xFFF3E5F5), 
+        'color': Color(0xFFE8F5E8), 
         'onTap': () => _showComingSoon('PDF Doldur & İmzala')
       },
       {
         'icon': Icons.picture_as_pdf, 
         'name': 'PDF Oluştur', 
-        'color': Color(0xFFFFEBEE), 
+        'color': Color(0xFFE3F2FD), 
         'onTap': _pickPdfFile
       },
       {
         'icon': Icons.layers, 
         'name': 'Sayfaları organize et', 
-        'color': Color(0xFFE8F5E8), 
+        'color': Color(0xFFFFF3E0), 
         'onTap': () => _showComingSoon('Sayfa Organizasyonu')
       },
       {
         'icon': Icons.merge, 
         'name': 'Dosyaları birleştirme', 
-        'color': Color(0xFFE3F2FD), 
+        'color': Color(0xFFE0F2F1), 
         'onTap': () => _showComingSoon('Dosya Birleştirme')
       },
     ];
@@ -796,13 +1178,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       color: tool['color'] as Color,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(tool['icon'] as IconData, color: Color(0xFF2196F3), size: 30),
+                    child: Icon(tool['icon'] as IconData, color: Color(0xFFD32F2F), size: 30),
                   ),
                   SizedBox(height: 12),
                   Text(
                     tool['name'] as String,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF2196F3)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFFD32F2F)),
                     maxLines: 2,
                   ),
                 ],
@@ -818,7 +1200,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$feature - Yakında eklenecek! 🚀'),
-        backgroundColor: Color(0xFF2196F3),
+        backgroundColor: Color(0xFFD32F2F),
       ),
     );
   }
@@ -828,19 +1210,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       children: [
         Padding(
           padding: EdgeInsets.all(16),
-          child: Text('Dosyalar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF2196F3))),
+          child: Text('Dosyalar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
         ),
-        
-        // Bu aygıtta
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text('Bu aygıtta', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
-        ),
-        _buildCloudItem('Fotoğraflar', Icons.photo_library, true, () => _showComingSoon('Fotoğraflar')),
         
         // Bulut Depolama
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text('Bulut Depolama', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
         ),
         _buildCloudItem('Google Drive', 'assets/icon/drive.png', false, () => _launchCloudService('Google Drive')),
@@ -857,7 +1232,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         // Daha fazla dosya
         Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: _buildCloudItem('Daha fazla dosyaya göz atın', Icons.folder_open, true, _pickPdfFile),
+          child: _buildCloudItem('Daha Fazla Dosya İçin Göz Atın', Icons.folder_open, true, _pickPdfFile),
         ),
       ],
     );
@@ -868,6 +1243,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       'Google Drive': 'https://drive.google.com',
       'OneDrive': 'https://onedrive.live.com',
       'Dropbox': 'https://www.dropbox.com',
+      'Gmail': 'https://gmail.com',
     };
     
     if (urls.containsKey(service)) {
@@ -885,10 +1261,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
         leading: isIcon 
-            ? Icon(icon as IconData, size: 24, color: Color(0xFF2196F3))
+            ? Icon(icon as IconData, size: 24, color: Color(0xFFD32F2F))
             : Image.asset(icon as String, width: 24, height: 24),
         title: Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
-        trailing: Icon(Icons.add, color: Color(0xFF2196F3)),
+        trailing: Icon(Icons.add, color: Color(0xFFD32F2F)),
         onTap: () => onTap(),
       ),
     );
@@ -906,7 +1282,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             Text('Gmail', style: TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
-        trailing: Icon(Icons.add, color: Color(0xFF2196F3)),
+        trailing: Icon(Icons.add, color: Color(0xFFD32F2F)),
         onTap: () => _launchCloudService('Gmail'),
       ),
     );
@@ -936,7 +1312,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           bottom: 16,
           right: 16,
           child: FloatingActionButton(
-            backgroundColor: _isFabOpen ? Color(0xFF1976D2) : Color(0xFF2196F3),
+            backgroundColor: _isFabOpen ? Color(0xFFB71C1C) : Color(0xFFD32F2F),
             onPressed: _toggleFab,
             child: AnimatedRotation(
               turns: _isFabOpen ? 0.125 : 0,
@@ -975,13 +1351,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Color(0xFFE3F2FD),
+                color: Color(0xFFFFEBEE),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Icon(icon, size: 20, color: Color(0xFF2196F3)),
+              child: Icon(icon, size: 20, color: Color(0xFFD32F2F)),
             ),
             SizedBox(width: 8),
-            Text(text, style: TextStyle(fontWeight: FontWeight.w500, color: Color(0xFF2196F3))),
+            Text(text, style: TextStyle(fontWeight: FontWeight.w500, color: Color(0xFFD32F2F))),
             SizedBox(width: 8),
           ],
         ),
@@ -997,7 +1373,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           Container(
             height: 140,
             decoration: BoxDecoration(
-              color: Color(0xFF2196F3),
+              color: Color(0xFFD32F2F),
             ),
             child: Padding(
               padding: EdgeInsets.all(16),
@@ -1008,47 +1384,266 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   CircleAvatar(
                     backgroundColor: Colors.white,
                     radius: 24,
-                    child: Text('DS', style: TextStyle(color: Color(0xFF2196F3), fontWeight: FontWeight.bold)),
+                    child: Image.asset('assets/icon/logo.png', width: 32, height: 32),
                   ),
                   SizedBox(height: 12),
                   Text('Dev Software', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                  Text('PDF Reader Premium', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                  Text('PDF Reader - Görüntüleyici & Editör', style: TextStyle(fontSize: 12, color: Colors.white70)),
                 ],
               ),
             ),
           ),
-          _buildDrawerItem(Icons.cloud, 'Bulut Depolama Alanı Yönet', () => _showComingSoon('Bulut Depolama')),
-          _buildDrawerItem(Icons.settings, 'Tercihler', () => _showComingSoon('Tercihler')),
-          _buildDrawerItem(Icons.help, 'Yardım ve Destek', () => _showComingSoon('Yardım')),
+          _buildDrawerItem(Icons.settings, 'Tercihler', _showPreferences),
+          _buildDrawerItem(Icons.help, 'Yardım ve Destek', _showHelpSupport),
           Divider(),
-          _buildDrawerSubItem('Diller', () => _showComingSoon('Dil Seçenekleri')),
-          _buildDrawerSubItem('Gizlilik', () => _showComingSoon('Gizlilik')),
-          _buildDrawerSubItem('PDF Reader Hakkında', () => _showAboutDialog()),
+          _buildDrawerSubItem('Diller', _showLanguageSettings),
+          _buildDrawerSubItem('Gizlilik', _showPrivacyPolicy),
+          _buildDrawerSubItem('PDF Reader Hakkında', _showAboutDialog),
         ],
       ),
     );
+  }
+
+  void _showPreferences() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Tema Seçin', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: Container(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.5,
+            ),
+            itemCount: AppTheme.values.length,
+            itemBuilder: (context, index) {
+              final theme = AppTheme.values[index];
+              final themeManager = Provider.of<ThemeManager>(context, listen: false);
+              final isSelected = themeManager.currentTheme == theme;
+              
+              Color getThemeColor() {
+                switch (theme) {
+                  case AppTheme.blue: return Color(0xFF1976D2);
+                  case AppTheme.green: return Color(0xFF388E3C);
+                  case AppTheme.purple: return Color(0xFF7B1FA2);
+                  case AppTheme.orange: return Color(0xFFF57C00);
+                  case AppTheme.red:
+                  default: return Color(0xFFD32F2F);
+                }
+              }
+              
+              String getThemeName() {
+                switch (theme) {
+                  case AppTheme.blue: return 'Mavi';
+                  case AppTheme.green: return 'Yeşil';
+                  case AppTheme.purple: return 'Mor';
+                  case AppTheme.orange: return 'Turuncu';
+                  case AppTheme.red: return 'Kırmızı';
+                  default: return 'Kırmızı';
+                }
+              }
+              
+              return Card(
+                color: isSelected ? getThemeColor().withOpacity(0.1) : Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected ? getThemeColor() : Colors.grey.shade300,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    themeManager.setTheme(theme);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('$getThemeName tema uygulandı')),
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: getThemeColor(),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(getThemeName(), style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: getThemeColor(),
+                      )),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelpSupport() {
+    final TextEditingController messageController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Yardım ve Destek', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Sorununuzu veya önerinizi bize iletin:'),
+              SizedBox(height: 16),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'E-posta Adresiniz',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 12),
+              TextField(
+                controller: messageController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  labelText: 'Mesajınız',
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('İptal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
+            onPressed: () {
+              if (messageController.text.trim().isEmpty || emailController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Lütfen tüm alanları doldurun')),
+                );
+                return;
+              }
+              
+              final Uri emailLaunchUri = Uri(
+                scheme: 'mailto',
+                path: 'devsoftwaremail@gmail.com',
+                queryParameters: {
+                  'subject': 'PDF Reader Destek Talebi',
+                  'body': 'E-posta: ${emailController.text}\n\nMesaj: ${messageController.text}',
+                },
+              );
+              
+              launchUrl(emailLaunchUri);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Mesajınız e-posta uygulamasına yönlendiriliyor...')),
+              );
+            },
+            child: Text('Gönder', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageSettings() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Dil Ayarları', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: Icon(Icons.language, color: Color(0xFFD32F2F)),
+              title: Text('Uygulama Dili'),
+              subtitle: Text('Yakında eklenecek'),
+              onTap: () => _showComingSoon('Uygulama Dili'),
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.picture_as_pdf, color: Color(0xFFD32F2F)),
+              title: Text('PDF Görüntüleyici Dili'),
+              subtitle: Text('Yakında eklenecek'),
+              onTap: () => _showComingSoon('PDF Görüntüleyici Dili'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrivacyPolicy() {
+    // Geçici olarak coming soon göster
+    _showComingSoon('Gizlilik Politikası');
+    // Daha sonra buraya privacy policy URL'si eklenecek
+    // launchUrl(Uri.parse('PRIVACY_POLICY_URL'));
   }
 
   void _showAboutDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('PDF Reader Hakkında', style: TextStyle(color: Color(0xFF2196F3))),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('PDF Reader v1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('Gelişmiş PDF yönetim ve okuma uygulaması'),
-            SizedBox(height: 8),
-            Text('© 2024 Dev Software'),
-          ],
+        title: Text('PDF Reader Hakkında', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('PDF Reader v1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Gelişmiş PDF görüntüleme ve yönetim uygulaması'),
+              SizedBox(height: 16),
+              Text('Kullanılan Teknolojiler:', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('• PDF.js - Mozilla'),
+              Text('• Flutter Framework'),
+              Text('• SQLite Database'),
+              Text('• InAppWebView'),
+              SizedBox(height: 16),
+              Text('Lisans Bilgileri:', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Bu uygulama açık kaynak kodlu teknolojiler kullanılarak geliştirilmiştir.'),
+              SizedBox(height: 8),
+              Text('© 2024 Dev Software'),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Kapat', style: TextStyle(color: Color(0xFF2196F3))),
+            child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
@@ -1057,7 +1652,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   Widget _buildDrawerItem(IconData icon, String title, Function onTap) {
     return ListTile(
-      leading: Icon(icon, size: 24, color: Color(0xFF2196F3)),
+      leading: Icon(icon, size: 24, color: Color(0xFFD32F2F)),
       title: Text(title),
       onTap: () {
         Navigator.pop(context);
@@ -1076,50 +1671,75 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
+  Widget _buildSearchAppBar() {
+    return AppBar(
+      backgroundColor: Color(0xFFD32F2F),
+      foregroundColor: Colors.white,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: _toggleSearchMode,
+      ),
+      title: TextField(
+        controller: _searchController,
+        focusNode: _searchFocusNode,
+        style: TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: 'PDF dosyalarında ara...',
+          hintStyle: TextStyle(color: Colors.white70),
+          border: InputBorder.none,
+        ),
+        onChanged: (value) {
+          setState(() {});
+        },
+        onSubmitted: _performSearch,
+      ),
+      actions: [
+        if (_searchController.text.isNotEmpty)
+          IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {});
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildNormalAppBar() {
+    return AppBar(
+      title: Text(_tabTitles[_currentTabIndex]),
+      actions: [
+        if (_currentTabIndex == 0) ...[
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: _toggleSearchMode,
+          ),
+        ],
+        IconButton(
+          icon: Image.asset('assets/icon/logo.png', width: 24, height: 24),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
+      ],
+      bottom: _currentTabIndex == 0 
+          ? TabBar(
+              controller: TabController(
+                length: 3,
+                vsync: this,
+                initialIndex: _currentHomeTabIndex,
+              ),
+              onTap: (index) => setState(() => _currentHomeTabIndex = index),
+              tabs: _homeTabTitles.map((title) => Tab(text: title)).toList(),
+            )
+          : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset('assets/icon/logo.png', width: 32, height: 32),
-            SizedBox(width: 12),
-            Text(_tabTitles[_currentTabIndex]),
-          ],
-        ),
-        actions: [
-          if (_currentTabIndex == 0) ...[
-            IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () => _showComingSoon('Arama'),
-            ),
-          ],
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () => _showComingSoon('Bildirimler'),
-          ),
-          IconButton(
-            icon: CircleAvatar(
-              backgroundColor: Color(0xFF2196F3),
-              child: Text('DS', style: TextStyle(color: Colors.white, fontSize: 12)),
-              radius: 16,
-            ),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-        ],
-        bottom: _currentTabIndex == 0 
-            ? TabBar(
-                controller: TabController(
-                  length: 3,
-                  vsync: this,
-                  initialIndex: _currentHomeTabIndex,
-                ),
-                onTap: (index) => setState(() => _currentHomeTabIndex = index),
-                tabs: _homeTabTitles.map((title) => Tab(text: title)).toList(),
-              )
-            : null,
-      ),
+      appBar: _isSearchMode ? _buildSearchAppBar() : _buildNormalAppBar(),
       drawer: _buildDrawer(),
       body: TabBarView(
         controller: _tabController,
@@ -1158,6 +1778,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void dispose() {
     _tabController.dispose();
     _database?.close();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 }
@@ -1208,10 +1830,12 @@ class _ViewerScreenState extends State<ViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.fileName, style: TextStyle(fontSize: 16)),
-        backgroundColor: Color(0xFF2196F3),
+        backgroundColor: themeManager.themeData.primaryColor,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -1239,7 +1863,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
             LinearProgressIndicator(
               value: _progress,
               backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2196F3)),
+              valueColor: AlwaysStoppedAnimation<Color>(themeManager.themeData.primaryColor),
             ),
           Expanded(
             child: Stack(
@@ -1270,9 +1894,9 @@ class _ViewerScreenState extends State<ViewerScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(color: Color(0xFF2196F3)),
+                        CircularProgressIndicator(color: themeManager.themeData.primaryColor),
                         SizedBox(height: 20),
-                        Text('PDF Yükleniyor...', style: TextStyle(color: Color(0xFF2196F3))),
+                        Text('PDF Yükleniyor...', style: TextStyle(color: themeManager.themeData.primaryColor)),
                       ],
                     ),
                   ),
