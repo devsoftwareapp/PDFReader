@@ -1,7 +1,6 @@
 {
   "@@locale": "zw_ZW",
   
-  // App & General
   "appTitle": "PDF Wanenoğ",
   "appSubtitle": "Vinenoğ & Vurnenoğ",
   "devSoftware": "Softwareya Developerî",
@@ -20,23 +19,19 @@
   "warning": "İqaz",
   "info": "Melumat",
   
-  // Main Tabs
   "home": "Keye",
   "tools": "Hacetî", 
   "files": "Dosyeyî",
   
-  // Home Sub Tabs
   "onDevice": "Cızat ser",
   "recent": "Neweyî",
   "favorites": "Favoritî",
   
-  // Drawer Menu
   "about": "Heqqedê",
   "helpAndSupport": "Peşti & Desteg",
   "languages": "Zıwanî",
   "privacy": "Private",
   
-  // File Operations
   "fileSelection": "Dosya Weçinîtîş",
   "pickFile": "Dosya weçîne",
   "scanAgain": "Fina scan ke",
@@ -47,14 +42,12 @@
   "filePrinted": "Dosya çap biya",
   "fileSaved": "Dosya qeyd biya",
   
-  // Search & Filter
   "searchPdfs": "PDFyan cı geyre...",
   "searchHistory": "Tarixê cıgeyrayîşî",
   "clearHistory": "Tarixi pak ke",
   "noResults": "Netice nêvêniyo",
   "searchResults": "Neticeyê cıgeyrayîşî",
   
-  // Permissions
   "permissionRequired": "İzın lazımo",
   "fileAccessPermission": "İzınê dosya ravêrdeyîşî",
   "grantPermission": "İzın bıde",
@@ -62,18 +55,15 @@
   "permissionDenied": "İzın red biyo",
   "permissionGranted": "İzın biyo daye",
   
-  // FAB Menu
   "selectFile": "Dosya weçîne",
   "scan": "Scan",
   "fromImage": "Resim ra",
   
-  // Cloud Services
   "cloudStorage": "Cloud Storage",
   "emailIntegration": "Email Integration",
   "pdfsFromEmails": "PDFyanê Emailan",
   "browseForMoreFiles": "Zêde dosyeyan bıvinc",
   
-  // Tools Screen
   "pdfMerger": "PDFya Têpia",
   "pdfSigner": "PDFya İmza kerde", 
   "pdfCompressor": "PDFya Têpia kerde",
@@ -85,7 +75,6 @@
   "organizePages": "Pelan organize ke",
   "addImageToPdf": "PDFya Resim cı ke",
   
-  // Tool Loading States
   "toolLoading": "Hacet barenê...",
   "mergerLoading": "PDFya Têpia barenê...",
   "signerLoading": "PDFya İmza kerde barenê...",
@@ -98,7 +87,6 @@
   "pageOrganizerLoading": "Organizatorê Pelan barenê...",
   "imageInserterLoading": "Cıkerdoğê Resimi barenê...",
   
-  // Viewer Screen
   "pdfViewer": "Vinayoğê PDFyan",
   "pdfLoading": "PDF barenê...",
   "page": "Pele",
@@ -109,14 +97,12 @@
   "fitToPage": "Heruna pele cı ke",
   "actualSize": "Gırdiya heqîqî",
   
-  // About Dialog
   "aboutPdfReader": "Heqqedê PDF Wanenoğ",
   "advancedPdfViewing": "Applicationê vinenoğ u idarekerdışê PDFyanê modernî.",
   "technologiesUsed": "Teknologiyê ke istifade biyê",
   "licenseInfo": "Melumatê Lîsansî",
   "openSourceTechnologies": "Na application teknologiyanê açıq kaynan ra vıraziyena.",
   
-  // Help & Support
   "helpSupport": "Peşti & Desteg",
   "describeIssue": "Problemê xo ya ki teklifê xo şırave ke:",
   "yourEmail": "Adresê Emailê To",
@@ -125,7 +111,6 @@
   "fillAllFields": "Xeyrê xo hemî qetan dolderne",
   "messageRedirecting": "Mesacê to email aplikasyon ser berz beno...",
   
-  // Language Settings
   "languageSettings": "Settingsê Zıwanan",
   "appLanguage": "Zıwanê Aplikasyonî",
   "pdfViewerLanguage": "Zıwanê Vinayoğê PDFyan",
@@ -137,12 +122,10 @@
   "restartLater": "Peyseren",
   "restartNow": "Nika Fina Gurenê",
   
-  // Privacy
   "privacyPolicy": "Siyasetê Privateyî",
   "comingSoon": "Zû yenê",
   "featureComingSoon": "Na feature zû yenê! 🚀",
   
-  // Notifications & Alerts
   "pdfSavedSuccess": "PDF weş qeyd biya",
   "pdfSaveError": "Xetaya qeydkerdışê PDFyan",
   "pdfOpenError": "Xetaya akerdışê PDFyan",
@@ -152,30 +135,25 @@
   "deleteError": "Xetaya esterîşî",
   "permissionError": "Xetaya îzînî",
   
-  // Empty States
   "noPdfFiles": "Dosyeya PDFyî nêvêniya",
   "noRecentFiles": "Hema dosyeyê neweyan çıniyê",
   "noFavorites": "Hema favoritî çıniyê",
   "noSearchResults": "Neticeyê cıgeyrayîşî nêvêniyê",
   
-  // File Info
   "fileSize": "Gırdiya Dosyeyî",
   "modifiedDate": "Tarixê Vurnayîşî",
   "fileInfo": "Melumatê Dosyeyî",
   
-  // Confirmation Dialogs
   "confirmDelete": "Esterîşî tesdîq ke",
   "deleteConfirmation": "Qet emel nêbeno, to wazeno \"{fileName}\" esterê?",
   "confirmRename": "Namekerdışî tesdîq ke",
   "newFileName": "Nameyê dosyeya newi",
   
-  // Cloud Service Names
   "googleDrive": "Google Drive",
   "oneDrive": "OneDrive", 
   "dropbox": "Dropbox",
   "gmail": "Gmail",
   
-  // Feature Tags
   "premium": "Premium",
   "new": "Newe",
   "popular": "Populer",
