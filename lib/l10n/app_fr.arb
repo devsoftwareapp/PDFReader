@@ -20,7 +20,7 @@
 "home": "Accueil",
 "tools": "Outils",
 "files": "Fichiers",
-"onDevice": "Sur l'Appareil",
+"onDevice": "Sur l''Appareil",
 "recent": "Récents",
 "favorites": "Favoris",
 "about": "À Propos",
@@ -38,18 +38,18 @@
 "fileSaved": "Fichier Enregistré",
 "searchPdfs": "Rechercher dans les PDFs...",
 "searchHistory": "Historique de Recherche",
-"clearHistory": "Effacer l'Historique",
+"clearHistory": "Effacer l''Historique",
 "noResults": "Aucun Résultat Trouvé",
 "searchResults": "Résultats de Recherche",
 "permissionRequired": "Autorisation Requise",
-"fileAccessPermission": "Autorisation d'Accès aux Fichiers",
-"grantPermission": "Accorder l'Autorisation",
+"fileAccessPermission": "Autorisation d''Accès aux Fichiers",
+"grantPermission": "Accorder l''Autorisation",
 "goToSettings": "Aller aux Paramètres",
 "permissionDenied": "Autorisation Refusée",
 "permissionGranted": "Autorisation Accordée",
 "selectFile": "Sélectionner un Fichier",
 "scan": "Scanner",
-"fromImage": "Depuis l'Image",
+"fromImage": "Depuis l''Image",
 "cloudStorage": "Stockage en Cloud",
 "emailIntegration": "Intégration Email",
 "pdfsFromEmails": "PDFs des Emails",
@@ -68,13 +68,13 @@
 "mergerLoading": "Fusionneur PDF en Chargement...",
 "signerLoading": "Signateur PDF en Chargement...",
 "compressorLoading": "Compresseur PDF en Chargement...",
-"imageConverterLoading": "Convertisseur d'Image en Chargement...",
+"imageConverterLoading": "Convertisseur d''Image en Chargement...",
 "ttsLoading": "Synthèse Vocale en Chargement...",
 "ocrLoading": "OCR en Chargement...",
 "pdfToImageLoading": "Convertisseur PDF vers Image en Chargement...",
 "textEditorLoading": "Éditeur de Texte en Chargement...",
 "pageOrganizerLoading": "Organisateur de Pages en Chargement...",
-"imageInserterLoading": "Insertion d'Image en Chargement...",
+"imageInserterLoading": "Insertion d''Image en Chargement...",
 "pdfViewer": "Visionneuse PDF",
 "pdfLoading": "PDF en Chargement...",
 "page": "Page",
@@ -95,12 +95,12 @@
 "yourMessage": "Votre Message",
 "send": "Envoyer",
 "fillAllFields": "Veuillez remplir tous les champs",
-"messageRedirecting": "Votre message est redirigé vers l'application email...",
+"messageRedirecting": "Votre message est redirigé vers l''application email...",
 "languageSettings": "Paramètres de Langue",
-"appLanguage": "Langue de l'Application",
+"appLanguage": "Langue de l''Application",
 "pdfViewerLanguage": "Langue de la Visionneuse PDF",
 "systemLanguage": "Langue du Système (Recommandé)",
-"deviceLanguage": "Langue de l'Appareil",
+"deviceLanguage": "Langue de l''Appareil",
 "changeLanguage": "Changer la Langue",
 "languageChanged": "Langue changée",
 "restartRequired": "Redémarrage requis pour que les changements prennent effet",
@@ -110,13 +110,13 @@
 "comingSoon": "Bientôt Disponible",
 "featureComingSoon": "Cette fonctionnalité arrive bientôt ! 🚀",
 "pdfSavedSuccess": "PDF enregistré avec succès",
-"pdfSaveError": "Erreur lors de l'enregistrement du PDF",
-"pdfOpenError": "Erreur lors de l'ouverture du PDF",
+"pdfSaveError": "Erreur lors de l''enregistrement du PDF",
+"pdfOpenError": "Erreur lors de l''ouverture du PDF",
 "fileShareError": "Erreur de partage de fichier",
-"printError": "Erreur d'impression",
+"printError": "Erreur d''impression",
 "renameError": "Erreur de renommage",
 "deleteError": "Erreur de suppression",
-"permissionError": "Erreur d'autorisation",
+"permissionError": "Erreur d''autorisation",
 "noPdfFiles": "Aucun fichier PDF trouvé",
 "noRecentFiles": "Aucun fichier récent pour le moment",
 "noFavorites": "Aucun favori pour le moment",
@@ -136,28 +136,28 @@
 "new": "Nouveau",
 "popular": "Populaire",
 "@appTitle": {
-"description": "Titre principal de l'application"
+"description": "Titre principal de l''application"
 },
 "@home": {
-"description": "Titre de l'onglet d'accueil"
+"description": "Titre de l''onglet d''accueil"
 },
 "@tools": {
-"description": "Titre de l'onglet d'outils"
+"description": "Titre de l''onglet d''outils"
 },
 "@files": {
-"description": "Titre de l'onglet de fichiers"
+"description": "Titre de l''onglet de fichiers"
 },
 "@searchPdfs": {
 "description": "Texte de placeholder du champ de recherche"
 },
 "@pdfViewer": {
-"description": "Titre de l'écran de visionneuse PDF"
+"description": "Titre de l''écran de visionneuse PDF"
 },
 "@about": {
 "description": "Section à propos dans le tiroir"
 },
 "@helpAndSupport": {
-"description": "Section d'aide et support"
+"description": "Section d''aide et support"
 },
 "@languages": {
 "description": "Paramètres des langues"

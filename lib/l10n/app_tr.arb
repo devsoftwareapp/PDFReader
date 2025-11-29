@@ -61,19 +61,19 @@
   
   "cloudStorage": "Bulut Depolama",
   "emailIntegration": "E-posta Entegrasyonu",
-  "pdfsFromEmails": "E-postalardaki PDF'ler",
+  "pdfsFromEmails": "E-postalardaki PDF''ler",
   "browseForMoreFiles": "Daha Fazla Dosya İçin Göz Atın",
   
   "pdfMerger": "PDF Birleştirme",
   "pdfSigner": "PDF İmzala", 
-  "pdfCompressor": "PDF'yi Sıkıştır",
-  "imageToPdf": "Resimden PDF'ye",
+  "pdfCompressor": "PDF''yi Sıkıştır",
+  "imageToPdf": "Resimden PDF''ye",
   "textToSpeech": "Sesli Okuma",
   "ocrTextExtraction": "OCR Metin Çıkarma",
-  "pdfToImage": "PDF'den Resme",
-  "addTextToPdf": "PDF'ye Metin Ekle",
+  "pdfToImage": "PDF''den Resme",
+  "addTextToPdf": "PDF''ye Metin Ekle",
   "organizePages": "PDF Sayfalarını Organize Et",
-  "addImageToPdf": "PDF'ye Resim Ekle",
+  "addImageToPdf": "PDF''ye Resim Ekle",
   
   "toolLoading": "Araç Yükleniyor...",
   "mergerLoading": "PDF Birleştirici Yükleniyor...",
@@ -82,7 +82,7 @@
   "imageConverterLoading": "Resim Dönüştürücü Yükleniyor...",
   "ttsLoading": "Sesli Okuyucu Yükleniyor...",
   "ocrLoading": "OCR Yükleniyor...",
-  "pdfToImageLoading": "PDF'den Resme Dönüştürücü Yükleniyor...",
+  "pdfToImageLoading": "PDF''den Resme Dönüştürücü Yükleniyor...",
   "textEditorLoading": "Metin Editörü Yükleniyor...",
   "pageOrganizerLoading": "Sayfa Organizatörü Yükleniyor...",
   "imageInserterLoading": "Resim Ekleme Aracı Yükleniyor...",
@@ -177,7 +177,7 @@
     "description": "PDF görüntüleyici ekran başlığı"
   },
   "@about": {
-    "description": "Drawer'daki hakkında bölümü"
+    "description": "Drawer''daki hakkında bölümü"
   },
   "@helpAndSupport": {
     "description": "Yardım ve destek bölümü"
