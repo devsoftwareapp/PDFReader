@@ -1,7 +1,6 @@
 {
   "@@locale": "ur_PK",
   
-  // App & General
   "appTitle": "PDF ریڈر",
   "appSubtitle": "ویور اور ایڈیٹر",
   "devSoftware": "Dev Software",
@@ -20,23 +19,19 @@
   "warning": "انتباہ",
   "info": "معلومات",
   
-  // Main Tabs
   "home": "ہوم",
   "tools": "ٹولز", 
   "files": "فائلیں",
   
-  // Home Sub Tabs
   "onDevice": "ڈیوائس پر",
   "recent": "حالیہ",
   "favorites": "پسندیدہ",
   
-  // Drawer Menu
   "about": "متعلق",
   "helpAndSupport": "مدد اور سپورٹ",
   "languages": "زبانیں",
   "privacy": "پرائیویسی",
   
-  // File Operations
   "fileSelection": "فائل انتخاب",
   "pickFile": "فائل منتخب کریں",
   "scanAgain": "دوبارہ سکین کریں",
@@ -47,14 +42,12 @@
   "filePrinted": "فائل پرنٹ ہو گئی",
   "fileSaved": "فائل محفوظ ہو گئی",
   
-  // Search & Filter
   "searchPdfs": "PDF میں تلاش کریں...",
   "searchHistory": "تلاش کی تاریخ",
   "clearHistory": "تاریخ صاف کریں",
   "noResults": "کوئی نتائج نہیں ملے",
   "searchResults": "تلاش کے نتائج",
   
-  // Permissions
   "permissionRequired": "اجازت درکار",
   "fileAccessPermission": "فائل رسائی کی اجازت",
   "grantPermission": "اجازت دیں",
@@ -62,18 +55,15 @@
   "permissionDenied": "اجازت مسترد",
   "permissionGranted": "اجازت دی گئی",
   
-  // FAB Menu
   "selectFile": "فائل منتخب کریں",
   "scan": "سکین کریں",
   "fromImage": "تصویر سے",
   
-  // Cloud Services
   "cloudStorage": "کلاؤڈ اسٹوریج",
   "emailIntegration": "ای میل انٹیگریشن",
   "pdfsFromEmails": "ای میلز سے PDF",
   "browseForMoreFiles": "مزید فائلیں براؤز کریں",
   
-  // Tools Screen
   "pdfMerger": "PDF ملاپ",
   "pdfSigner": "PDF دستخط", 
   "pdfCompressor": "PDF کمپریسر",
@@ -85,7 +75,6 @@
   "organizePages": "صفحات کو منظم کریں",
   "addImageToPdf": "PDF میں تصویر شامل کریں",
   
-  // Tool Loading States
   "toolLoading": "ٹول لوڈ ہو رہا ہے...",
   "mergerLoading": "PDF ملاپ لوڈ ہو رہا ہے...",
   "signerLoading": "PDF دستخط لوڈ ہو رہا ہے...",
@@ -98,7 +87,6 @@
   "pageOrganizerLoading": "صفحہ آرگنائزر لوڈ ہو رہا ہے...",
   "imageInserterLoading": "تصویر داخل کرنے والا لوڈ ہو رہا ہے...",
   
-  // Viewer Screen
   "pdfViewer": "PDF ویور",
   "pdfLoading": "PDF لوڈ ہو رہا ہے...",
   "page": "صفحہ",
@@ -109,14 +97,12 @@
   "fitToPage": "صفحہ میں فٹ کریں",
   "actualSize": "اصل سائز",
   
-  // About Dialog
   "aboutPdfReader": "PDF ریڈر کے بارے میں",
   "advancedPdfViewing": "ایڈوانس PDF دیکھنے اور مینجمنٹ ایپلیکیشن۔",
   "technologiesUsed": "استعمال ہونے والی ٹیکنالوجیز",
   "licenseInfo": "لائسنس کی معلومات",
   "openSourceTechnologies": "یہ ایپلیکیشن اوپن سورس ٹیکنالوجیز کا استعمال کرتے ہوئے تیار کی گئی ہے۔",
   
-  // Help & Support
   "helpSupport": "مدد اور سپورٹ",
   "describeIssue": "اپنا مسئلہ یا تجویز بیان کریں:",
   "yourEmail": "آپ کا ای میل پتہ",
@@ -125,7 +111,6 @@
   "fillAllFields": "براہ کرم تمام فیلڈز بھریں",
   "messageRedirecting": "آپ کا پیغام ای میل ایپ پر ری ڈائریکٹ ہو رہا ہے...",
   
-  // Language Settings
   "languageSettings": "زبان کی ترتیبات",
   "appLanguage": "ایپ کی زبان",
   "pdfViewerLanguage": "PDF ویور کی زبان",
@@ -137,12 +122,10 @@
   "restartLater": "بعد میں",
   "restartNow": "ابھی دوبارہ شروع کریں",
   
-  // Privacy
   "privacyPolicy": "پرائیویسی پالیسی",
   "comingSoon": "جلد آ رہا ہے",
   "featureComingSoon": "یہ فیچر جلد آ رہا ہے! 🚀",
   
-  // Notifications & Alerts
   "pdfSavedSuccess": "PDF کامیابی سے محفوظ ہو گیا",
   "pdfSaveError": "PDF محفوظ کرنے میں خرابی",
   "pdfOpenError": "PDF کھولنے میں خرابی",
@@ -152,30 +135,25 @@
   "deleteError": "حذف کرنے میں خرابی",
   "permissionError": "اجازت کی خرابی",
   
-  // Empty States
   "noPdfFiles": "کوئی PDF فائلیں نہیں ملیں",
   "noRecentFiles": "ابھی تک کوئی حالیہ فائلیں نہیں ہیں",
   "noFavorites": "ابھی تک کوئی پسندیدہ نہیں ہیں",
   "noSearchResults": "کوئی تلاش کے نتائج نہیں ملے",
   
-  // File Info
   "fileSize": "فائل کا سائز",
   "modifiedDate": "ترمیم کی تاریخ",
   "fileInfo": "فائل کی معلومات",
   
-  // Confirmation Dialogs
   "confirmDelete": "حذف کی تصدیق کریں",
   "deleteConfirmation": "کیا آپ واقعی \"{fileName}\" حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔",
   "confirmRename": "نام تبدیل کرنے کی تصدیق کریں",
   "newFileName": "نیا فائل نام",
   
-  // Cloud Service Names
   "googleDrive": "Google Drive",
   "oneDrive": "OneDrive", 
   "dropbox": "Dropbox",
   "gmail": "Gmail",
   
-  // Feature Tags
   "premium": "پریمیم",
   "new": "نیا",
   "popular": "مقبول",
