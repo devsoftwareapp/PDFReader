@@ -15,6 +15,9 @@ import 'package:printing/printing.dart';
 import 'package:open_file/open_file.dart';
 import 'package:sqflite/sqflite.dart';
 
+// Yeni oluşturduğumuz dosyayı import ediyoruz
+import 'tools_screen.dart';
+
 // Intent handling için
 final MethodChannel _intentChannel = MethodChannel('app.channel.shared/data');
 final MethodChannel _pdfViewerChannel = MethodChannel('pdf_viewer_channel');
@@ -71,9 +74,6 @@ void main() async {
 
 Future<void> _createAppFolder() async {
   try {
-    // İzin kontrolü yapmadan önce basitçe yolu belirleyelim, izin varsa oluşturur
-    // Android 10+ scoped storage nedeniyle bu yol her zaman çalışmayabilir ama
-    // MANAGE_EXTERNAL_STORAGE izni alındığında çalışır.
     final path = '/storage/emulated/0/Download/PDF Reader';
     final dir = Directory(path);
     if (!await dir.exists()) {
@@ -103,7 +103,7 @@ class PdfManagerApp extends StatelessWidget {
           backgroundColor: Color(0xFFD32F2F),
           foregroundColor: Colors.white,
           elevation: 2,
-          systemOverlayStyle: SystemUiOverlayStyle.light, // Status bar beyaz ikonlar
+          systemOverlayStyle: SystemUiOverlayStyle.light,
           titleTextStyle: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -198,7 +198,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _permissionGranted = false;
   int _currentTabIndex = 0;
   
-  // Tab controllerlar
   late TabController _mainTabController;
   late TabController _homeSubTabController;
 
@@ -208,26 +207,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
-  // Veritabanı için
   Database? _database;
-
-  // Tema yöneticisi
   final ThemeManager _themeManager = ThemeManager();
 
-  // Tab başlıkları
   final List<String> _tabTitles = ['Ana Sayfa', 'Araçlar', 'Dosyalar'];
   final List<String> _homeTabTitles = ['Cihazda', 'Son Kullanılanlar', 'Favoriler'];
 
   @override
   void initState() {
     super.initState();
-    // Ana sayfa sekmeleri için (Ana Sayfa, Araçlar, Dosyalar)
     _mainTabController = TabController(length: 3, vsync: this);
     _mainTabController.addListener(_handleTabChange);
 
-    // Ana sayfa içindeki alt sekmeler için (Cihazda, Son, Fav)
     _homeSubTabController = TabController(length: 3, vsync: this);
-    // İç sekmeler değiştiğinde UI güncelle
     _homeSubTabController.addListener(() {
       setState(() {});
     });
@@ -236,10 +228,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _checkPermission();
     _loadSearchHistory();
     
-    // Intent listener'ı kur
     _intentChannel.setMethodCallHandler(_handleIntentMethodCall);
     
-    // Intent'i işle - GECİKMELİ olarak
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleInitialIntent();
     });
@@ -279,7 +269,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _loadFavorites() async {
     if (_database == null) return;
-    
     final List<Map<String, dynamic>> maps = await _database!.query('favorites');
     setState(() {
       _favoriteFiles = List.generate(maps.length, (i) => maps[i]['file_path']);
@@ -288,7 +277,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _loadRecents() async {
     if (_database == null) return;
-    
     final List<Map<String, dynamic>> maps = await _database!.query('recents');
     setState(() {
       _recentFiles = List.generate(maps.length, (i) => maps[i]['file_path']);
@@ -297,7 +285,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _loadSearchHistory() async {
     if (_database == null) return;
-    
     final List<Map<String, dynamic>> maps = await _database!.query(
       'search_history',
       orderBy: 'searched_date DESC',
@@ -310,7 +297,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _addToSearchHistory(String query) async {
     if (_database == null) return;
-    
     await _database!.insert(
       'search_history',
       {
@@ -324,14 +310,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _clearSearchHistory() async {
     if (_database == null) return;
-    
     await _database!.delete('search_history');
     await _loadSearchHistory();
   }
 
   Future<void> _addToFavorites(String filePath) async {
     if (_database == null) return;
-    
     await _database!.insert(
       'favorites',
       {
@@ -345,7 +329,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _removeFromFavorites(String filePath) async {
     if (_database == null) return;
-    
     await _database!.delete(
       'favorites',
       where: 'file_path = ?',
@@ -356,7 +339,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _addToRecents(String filePath) async {
     if (_database == null) return;
-    
     await _database!.insert(
       'recents',
       {
@@ -374,23 +356,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  // Intent method call handler
   Future<dynamic> _handleIntentMethodCall(MethodCall call) async {
-    print('📱 Method call received: ${call.method}');
-    
     if (call.method == 'onNewIntent') {
       final intentData = Map<String, dynamic>.from(call.arguments);
-      print('🔄 New intent received: $intentData');
       _processExternalPdfIntent(intentData);
     }
-    
     return null;
   }
 
-  // External intent işleme
   void _handleInitialIntent() {
     if (widget.initialIntent != null && widget.initialIntent!.isNotEmpty) {
-      print('📱 Initial intent received: ${widget.initialIntent}');
       _processExternalPdfIntent(widget.initialIntent!);
     }
   }
@@ -398,16 +373,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _processExternalPdfIntent(Map<String, dynamic> intentData) {
     final action = intentData['action'];
     final uri = intentData['uri'];
-    
-    print('📄 Processing EXTERNAL PDF intent: $uri');
-    
     try {
       if ((action == 'android.intent.action.VIEW' || action == 'android.intent.action.SEND') && uri != null) {
-        print('🎯 Opening external PDF: $uri');
         _handleExternalPdfOpening(uri);
       }
     } catch (e) {
-      print('💥 External PDF intent processing error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('❌ PDF açılırken hata: $e')),
@@ -416,17 +386,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  // External PDF açma ve kopyalama işlemi
   Future<void> _handleExternalPdfOpening(String uri) async {
     try {
       String sourcePath = uri;
-      
-      // content:// URI ise file path'e çevirmeye çalış
       if (uri.startsWith('content://')) {
         sourcePath = await _pdfViewerChannel.invokeMethod('convertContentUri', {'uri': uri});
       }
 
-      // Dosyayı "Download/PDF Reader" klasörüne kopyala
       final downloadDir = Directory('/storage/emulated/0/Download/PDF Reader');
       if (!await downloadDir.exists()) {
         await downloadDir.create(recursive: true);
@@ -435,25 +401,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       final fileName = _extractFileNameFromUri(uri);
       final newPath = '${downloadDir.path}/$fileName';
       
-      // Dosyayı kopyala
       try {
         final sourceFile = File(sourcePath);
         if (await sourceFile.exists()) {
           await sourceFile.copy(newPath);
-          print('✅ Dosya kopyalandı: $newPath');
-        } else {
-           print('⚠️ Kaynak dosya bulunamadı, direkt URI denenecek');
-           // Eğer path çevrilemediyse ve kopyalanamadıysa mecburen URI ile açmaya çalışırız
-           // Ama bu durumda print/share çalışmayabilir.
         }
       } catch (e) {
-         print('Kopyalama hatası: $e');
-         // Kopyalama başarısız olsa bile orijinal yoldan açmayı dene
+         // Hata yok say
       }
 
-      // Kopyalanmış dosyayı (varsa) yoksa orijinali aç
       final fileToOpen = File(newPath).existsSync() ? newPath : sourcePath;
-      
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -465,7 +422,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
 
     } catch (e) {
-      print('❌ Open external PDF error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('❌ PDF açılırken hata: $e')),
       );
@@ -487,19 +443,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         return fileName;
       }
     } catch (e) {
-      print('Error parsing URI: $e');
+      // Hata yok say
     }
     return 'document_${DateTime.now().millisecondsSinceEpoch}.pdf';
   }
 
   Future<void> _checkPermission() async {
     Permission permission = await _getRequiredPermission();
-    
     var status = await permission.status;
     setState(() {
       _permissionGranted = status.isGranted;
     });
-    
     if (_permissionGranted) {
       _scanDeviceForPdfs();
     }
@@ -508,7 +462,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<Permission> _getRequiredPermission() async {
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
-    if (androidInfo.version.sdkInt >= 30) { // Android 11+
+    if (androidInfo.version.sdkInt >= 30) {
       return Permission.manageExternalStorage;
     }
     return Permission.storage;
@@ -516,14 +470,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _requestPermission() async {
     Permission permission = await _getRequiredPermission();
-    
     var status = await permission.request();
     setState(() {
       _permissionGranted = status.isGranted;
     });
-    
     if (status.isGranted) {
-      _createAppFolder(); // İzin alındığında klasörü oluştur
+      _createAppFolder();
       _scanDeviceForPdfs();
     } else if (status.isPermanentlyDenied) {
       _showPermissionDialog();
@@ -577,7 +529,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         }
       }
     } catch (e) {
-      print('Scan error: $e');
+      // Hata yok say
     } finally {
       setState(() {
         _isLoading = false;
@@ -590,7 +542,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       final dir = Directory(dirPath);
       if (await dir.exists()) {
         final entities = dir.listSync(recursive: true);
-        
         for (var entity in entities) {
           if (entity is File && entity.path.toLowerCase().endsWith('.pdf')) {
             if (!_pdfFiles.contains(entity.path)) {
@@ -619,7 +570,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _openViewer(filePath);
       }
     } catch (e) {
-      print('File pick error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Dosya seçilirken hata: $e')),
       );
@@ -637,7 +587,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
 
       await _addToRecents(path);
-      
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -678,7 +627,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _deleteFile(String filePath) async {
     final fileName = p.basename(filePath);
-    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -696,13 +644,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               try {
                 final file = File(filePath);
                 await file.delete();
-                
                 setState(() {
                   _pdfFiles.remove(filePath);
                   _favoriteFiles.remove(filePath);
                   _recentFiles.remove(filePath);
                 });
-                
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Dosya silindi: $fileName')),
                 );
@@ -743,15 +689,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (query.trim().isNotEmpty) {
       _addToSearchHistory(query.trim());
     }
-    // Arama işlemi state yenilenince _buildHomeTabContent içinde filtreleme ile yapılıyor
     setState(() {});
   }
 
-  // Ana sayfa alt sekmelerini render eden metod
   Widget _buildHomeContent() {
     return TabBarView(
       controller: _homeSubTabController,
-      // Bu kısımda (Cihazda, Son, Favoriler) kaydırma aktif
       physics: null, 
       children: [
         _buildDeviceFiles(),
@@ -946,7 +889,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Konum bilgisi kaldırıldı (İstek üzerine)
             SizedBox(height: 2),
             Text(
               '${formatFileSize(fileSize)} - ${formatDate(modifiedDate)}',
@@ -977,7 +919,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 PopupMenuItem(value: 'share', child: Text('Paylaş')),
                 PopupMenuItem(value: 'rename', child: Text('Yeniden Adlandır')),
                 PopupMenuItem(value: 'print', child: Text('Yazdır')),
-                // Kopyala kaldırıldı (İstek üzerine)
                 PopupMenuItem(value: 'delete', child: Text('Sil', style: TextStyle(color: Colors.red))),
               ],
             ),
@@ -1077,7 +1018,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       );
     }
-
     return ListView.builder(
       itemCount: _recentFiles.length,
       itemBuilder: (_, i) => _buildFileItem(_recentFiles[i], false),
@@ -1106,99 +1046,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       );
     }
-
     return ListView.builder(
       itemCount: _favoriteFiles.length,
       itemBuilder: (_, i) => _buildFileItem(_favoriteFiles[i], true),
     );
   }
 
-  Widget _buildToolsTab() {
-    final tools = [
-      {
-        'icon': Icons.edit, 
-        'name': 'PDF Düzenle', 
-        'color': Color(0xFFFFEBEE), 
-        'onTap': () => _showComingSoon('PDF Düzenleme')
-      },
-      {
-        'icon': Icons.volume_up, 
-        'name': 'Sesli okuma', 
-        'color': Color(0xFFF3E5F5), 
-        'onTap': () => _showComingSoon('Sesli Okuma')
-      },
-      {
-        'icon': Icons.edit_document, 
-        'name': 'PDF Doldur & İmzala', 
-        'color': Color(0xFFE8F5E8), 
-        'onTap': () => _showComingSoon('PDF Doldur & İmzala')
-      },
-      {
-        'icon': Icons.picture_as_pdf, 
-        'name': 'PDF Oluştur', 
-        'color': Color(0xFFE3F2FD), 
-        'onTap': _pickPdfFile
-      },
-      {
-        'icon': Icons.layers, 
-        'name': 'Sayfaları organize et', 
-        'color': Color(0xFFFFF3E0), 
-        'onTap': () => _showComingSoon('Sayfa Organizasyonu')
-      },
-      {
-        'icon': Icons.merge, 
-        'name': 'Dosyaları birleştirme', 
-        'color': Color(0xFFE0F2F1), 
-        'onTap': () => _showComingSoon('Dosya Birleştirme')
-      },
-    ];
-
-    return GridView.builder(
-      padding: EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: tools.length,
-      itemBuilder: (context, index) {
-        final tool = tools[index];
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: tool['onTap'] as Function(),
-            child: Container(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: tool['color'] as Color,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(tool['icon'] as IconData, color: Color(0xFFD32F2F), size: 30),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    tool['name'] as String,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFFD32F2F)),
-                    maxLines: 2,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+  // _buildToolsTab SİLİNDİ, artık ToolsScreen kullanılıyor
 
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -1216,8 +1070,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           padding: EdgeInsets.all(16),
           child: Text('Dosyalar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
         ),
-        
-        // Bulut Depolama
         Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text('Bulut Depolama', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
@@ -1226,14 +1078,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _buildCloudItem('OneDrive', 'assets/icon/onedrive.png', false, () => _launchCloudService('OneDrive')),
         _buildCloudItem('Dropbox', 'assets/icon/dropbox.png', false, () => _launchCloudService('Dropbox')),
         
-        // E-posta Entegrasyonu
         Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: Text('E-posta Entegrasyonu', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
         ),
         _buildGmailItem(),
         
-        // Daha fazla dosya
         Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: _buildCloudItem('Daha Fazla Dosya İçin Göz Atın', Icons.folder_open, true, _pickPdfFile),
@@ -1249,7 +1099,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       'Dropbox': 'https://www.dropbox.com',
       'Gmail': 'https://gmail.com',
     };
-    
     if (urls.containsKey(service)) {
       final url = Uri.parse(urls[service]!);
       if (await canLaunchUrl(url)) {
@@ -1375,11 +1224,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         padding: EdgeInsets.zero,
         children: [
           Container(
-            height: 160, // Yükseklik biraz arttırıldı
+            height: 160, 
             decoration: BoxDecoration(
               color: Color(0xFFD32F2F),
             ),
-            child: SafeArea( // Status bar'a değmemesi için
+            child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
                 child: Column(
@@ -1399,13 +1248,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          // Tema Ayarları Kaldırıldı, yerine Hakkında eklendi
           _buildDrawerItem(Icons.info, 'PDF Reader Hakkında', _showAboutDialog),
           _buildDrawerItem(Icons.help, 'Yardım ve Destek', _showHelpSupport),
           Divider(),
           _buildDrawerSubItem('Diller', _showLanguageSettings),
           _buildDrawerSubItem('Gizlilik', _showPrivacyPolicy),
-          // Hakkında buradan kaldırıldı
         ],
       ),
     );
@@ -1414,7 +1261,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _showHelpSupport() {
     final TextEditingController messageController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
-    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1460,7 +1306,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 );
                 return;
               }
-              
               final Uri emailLaunchUri = Uri(
                 scheme: 'mailto',
                 path: 'devsoftwaremail@gmail.com',
@@ -1469,7 +1314,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   'body': 'E-posta: ${emailController.text}\n\nMesaj: ${messageController.text}',
                 },
               );
-              
               launchUrl(emailLaunchUri);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -1639,7 +1483,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ? Colors.grey[800] 
                     : Colors.white,
                 child: TabBar(
-                  controller: _homeSubTabController, // Yeni controller bağlandı
+                  controller: _homeSubTabController,
                   tabs: _homeTabTitles.map((title) => Tab(
                     child: Text(
                       title,
@@ -1665,14 +1509,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Navigation Bar rengi ve ikonları için
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         systemNavigationBarColor: isDark ? Colors.grey[800] : Colors.white,
         systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        statusBarColor: Colors.transparent, // AppBar rengi zaten var
+        statusBarColor: Colors.transparent, 
       ),
       child: Scaffold(
         key: _scaffoldKey,
@@ -1680,11 +1523,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         drawer: _buildDrawer(),
         body: TabBarView(
           controller: _mainTabController,
-          // Ana sekmeler arası (Home-Tools-Files) kaydırma kapatıldı
           physics: NeverScrollableScrollPhysics(),
           children: [
-            _buildHomeContent(), // Buradaki TabBarView kaydırılabilir (yukarıda tanımlı)
-            _buildToolsTab(),
+            _buildHomeContent(),
+            ToolsScreen(onPickFile: _pickPdfFile), // Burası güncellendi
             _buildFilesTab(),
           ],
         ),
@@ -1749,7 +1591,6 @@ class _ViewerScreenState extends State<ViewerScreen> {
   String _viewerUrl() {
     try {
       String fileUri;
-      
       if (widget.fileUri != null) {
         fileUri = widget.fileUri!;
       } else if (widget.file != null) {
@@ -1757,14 +1598,10 @@ class _ViewerScreenState extends State<ViewerScreen> {
       } else {
         throw Exception('No file or URI provided');
       }
-      
       final encodedFileUri = Uri.encodeComponent(fileUri);
       final viewerUrl = 'file:///android_asset/flutter_assets/assets/web/viewer.html?file=$encodedFileUri';
-      
-      print('🌐 Viewer URL: $viewerUrl');
       return viewerUrl;
     } catch (e) {
-      print('❌ URI creation error: $e');
       return 'file:///android_asset/flutter_assets/assets/web/viewer.html';
     }
   }
