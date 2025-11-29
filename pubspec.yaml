@@ -36,6 +36,7 @@ dependencies:
   read_pdf_text: ^0.3.1 # PDF Metin Çıkarma
   hand_signature: ^3.1.0+2 # İmza UI (Doldur ve İmzala için)
   image: ^4.0.17
+  scrollable_positioned_list: ^0.3.5
 
 dev_dependencies:
   flutter_test:
