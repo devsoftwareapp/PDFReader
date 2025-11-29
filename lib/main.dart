@@ -1328,28 +1328,171 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showLanguageSettings() {
+    final List<String> appLanguages = [
+      'İngilizce', 'Çince', 'Hintçe', 'İspanyolca', 'Fransızca', 
+      'Arapça', 'Bengalce', 'Rusça', 'Portekizce', 'Endonezce',
+      'Urducu', 'Almanca', 'Japonca', 'Svahili', 'Türkçe'
+    ];
+
+    final Map<String, String> pdfViewerLanguages = {
+      'an': 'Aragonca',
+      'ar': 'Arapça',
+      'az': 'Azerice',
+      'be': 'Belarusça',
+      'bg': 'Bulgarca',
+      'bn': 'Bengalce',
+      'bo': 'Tibetçe',
+      'br': 'Bretonca',
+      'bs': 'Boşnakça',
+      'ca': 'Katalanca',
+      'cak': 'Kaqçikelce',
+      'cs': 'Çekçe',
+      'cy': 'Galce',
+      'da': 'Danca',
+      'de': 'Almanca',
+      'dsb': 'Aşağı Sorbça',
+      'el': 'Yunanca',
+      'en-CA': 'İngilizce (Kanada)',
+      'en-GB': 'İngilizce (Birleşik Krallık)',
+      'en-US': 'İngilizce (ABD)',
+      'es-AR': 'İspanyolca (Arjantin)',
+      'es-CL': 'İspanyolca (Şili)',
+      'es-ES': 'İspanyolca (İspanya)',
+      'es-MX': 'İspanyolca (Meksika)',
+      'et': 'Estonyaca',
+      'eu': 'Baskça',
+      'fa': 'Farsça',
+      'ff': 'Fulaca',
+      'fi': 'Fince',
+      'fr': 'Fransızca',
+      'fy-NL': 'Frizce',
+      'ga-IE': 'İrlandaca',
+      'gl': 'Galiçyaca',
+      'gn': 'Guaranice',
+      'hi-IN': 'Hintçe',
+      'hr': 'Hırvatça',
+      'hsb': 'Yukarı Sorbça',
+      'hu': 'Macarca',
+      'hy-AM': 'Ermenice',
+      'id': 'Endonezce',
+      'is': 'İzlandaca',
+      'it': 'İtalyanca',
+      'ja': 'Japonca',
+      'kk': 'Kazakça',
+      'km': 'Kmerce',
+      'kn': 'Kannada',
+      'ko': 'Korece',
+      'lo': 'Laoca',
+      'lt': 'Litvanca',
+      'lv': 'Letonca',
+      'meh': 'Güneybatı Tlaxiaco Mixtece',
+      'mk': 'Makedonca',
+      'ml': 'Malayalam',
+      'mr': 'Marathi',
+      'ms': 'Malayca',
+      'my': 'Burmaca',
+      'nb-NO': 'Norveççe (Bokmål)',
+      'ne-NP': 'Nepalce',
+      'nn-NO': 'Norveççe (Nynorsk)',
+      'oc': 'Oksitanca',
+      'pa-IN': 'Pencapça',
+      'pl': 'Lehçe',
+      'pt-BR': 'Portekizce (Brezilya)',
+      'pt-PT': 'Portekizce (Portekiz)',
+      'ro': 'Rumence',
+      'ru': 'Rusça',
+      'sat': 'Santali',
+      'scn': 'Sicilyaca',
+      'sco': 'İskoçça',
+      'sk': 'Slovakça',
+      'sl': 'Slovence',
+      'sq': 'Arnavutça',
+      'sr': 'Sırpça',
+      'sv-SE': 'İsveççe',
+      'ta': 'Tamilce',
+      'te': 'Telugu',
+      'tg': 'Tacikçe',
+      'th': 'Tayca',
+      'tr': 'Türkçe',
+      'uk': 'Ukraynaca',
+      'ur': 'Urduca',
+      'uz': 'Özbekçe',
+      'vi': 'Vietnamca',
+      'zh-CN': 'Çince (Basitleştirilmiş)',
+      'zh-TW': 'Çince (Geleneksel)'
+    };
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Dil Ayarları', style: TextStyle(color: Color(0xFFD32F2F))),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: Icon(Icons.language, color: Color(0xFFD32F2F)),
-              title: Text('Uygulama Dili'),
-              subtitle: Text('Yakında eklenecek'),
-              onTap: () => _showComingSoon('Uygulama Dili'),
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(Icons.picture_as_pdf, color: Color(0xFFD32F2F)),
-              title: Text('PDF Görüntüleyici Dili'),
-              subtitle: Text('Yakında eklenecek'),
-              onTap: () => _showComingSoon('PDF Görüntüleyici Dili'),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Uygulama Dili', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              SizedBox(height: 8),
+              ...appLanguages.map((language) => ListTile(
+                title: Text(language),
+                trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () => _showComingSoon('$language dili'),
+              )).toList(),
+              
+              SizedBox(height: 16),
+              Divider(),
+              SizedBox(height: 8),
+              
+              Text('PDF Görüntüleyici Dili', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              SizedBox(height: 8),
+              Text('PDF görüntüleyici dili otomatik olarak cihaz dilinize ayarlanır. Değiştirmek isterseniz aşağıdan seçebilirsiniz.', 
+                style: TextStyle(fontSize: 12, color: Colors.grey)),
+              SizedBox(height: 8),
+              ...pdfViewerLanguages.entries.take(10).map((entry) => ListTile(
+                title: Text(entry.value),
+                trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () => _showComingSoon('PDF Görüntüleyici - ${entry.value}'),
+              )).toList(),
+              
+              if (pdfViewerLanguages.length > 10)
+                TextButton(
+                  onPressed: () => _showAllPdfLanguages(pdfViewerLanguages),
+                  child: Text('Tüm dilleri göster (${pdfViewerLanguages.length})', 
+                    style: TextStyle(color: Color(0xFFD32F2F))),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAllPdfLanguages(Map<String, String> languages) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('PDF Görüntüleyici Dilleri', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: Container(
+          width: double.maxFinite,
+          height: 400,
+          child: ListView(
+            children: [
+              ...languages.entries.map((entry) => ListTile(
+                title: Text(entry.value),
+                trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showComingSoon('PDF Görüntüleyici - ${entry.value}');
+                },
+              )).toList(),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -1377,19 +1520,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             children: [
               Text('PDF Reader v1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text('Gelişmiş PDF görüntüleme ve yönetim uygulaması'),
+              Text('Gelişmiş PDF görüntüleme ve yönetim uygulaması.'),
               SizedBox(height: 16),
-              Text('Kullanılan Teknolojiler:', style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text('• PDF.js - Mozilla'),
-              Text('• Flutter Framework'),
-              Text('• SQLite Database'),
-              Text('• InAppWebView'),
-              SizedBox(height: 16),
-              Text('Lisans Bilgileri:', style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text('Bu uygulama açık kaynak kodlu teknolojiler kullanılarak geliştirilmiştir.'),
-              SizedBox(height: 8),
               Text('© 2024 Dev Software'),
             ],
           ),
