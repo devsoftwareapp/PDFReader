@@ -6,6 +6,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
+// Gerekli Olan Ancak Eksik Olan Import
+import 'package:device_info_plus/device_info_plus.dart'; 
+
 // PDF ve Görüntü İşleme Paketleri
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -14,7 +17,7 @@ import 'package:image/image.dart' as img;
 
 // TTS (Sesli Okuma) Paketleri
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:read_pdf_text/read_pdf_text.dart';
+import 'package:read_pdf_text/read_pdf_text.dart'; // HATA DÜZELTİLDİ: Metin çekme fonksiyonu
 
 // Diğer Yardımcı Paketler
 import 'package:open_file/open_file.dart';
@@ -26,14 +29,17 @@ import 'package:permission_handler/permission_handler.dart';
 
 /// Basit bir snackbar göstericisi
 void _showSnackbar(BuildContext context, String message, {Color color = const Color(0xFFD32F2F)}) {
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      backgroundColor: color,
-      duration: const Duration(seconds: 3),
-    ),
-  );
+  // SnackBar'ın BuildContext dışından çağrılması ihtimaline karşı kontrol
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
 }
 
 /// PDF Dosya İşlemleri İçin Servis Sınıfı
@@ -46,13 +52,12 @@ class PdfService {
   Future<bool> _requestPermission() async {
     // Android 13 (SDK 33) ve sonrası için özel izinler
     if (Platform.isAndroid) {
-      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      final androidInfo = await DeviceInfoPlugin().androidInfo; // HATA DÜZELTİLDİ: DeviceInfoPlugin eklendi.
       if (androidInfo.version.sdkInt >= 33) {
-        // MANAGE_EXTERNAL_STORAGE iznini istemeden sadece MEDIA izinlerini istiyoruz.
-        // Bu genellikle dosya kaydetme için yeterlidir.
+        // Android 13+ için sadece fotoğraf ve medya izni yeterli
         final status = await Permission.photos.request();
-        final statusStorage = await Permission.storage.request();
-        return status.isGranted && statusStorage.isGranted;
+        final statusVideos = await Permission.videos.request();
+        return status.isGranted && statusVideos.isGranted;
       }
     }
     // Diğer platformlar ve eski Android sürümleri için standart depolama izni
@@ -68,13 +73,14 @@ class PdfService {
         return;
       }
 
-      // 'Download/PDF Reader' klasör yolunu bulma
+      // 'Download/PDF Reader' klasör yolunu bulma (Main.dart'ın oluşturduğu yol)
       final dir = await getExternalStorageDirectory();
       if (dir == null) {
         _showSnackbar(context, "Cihaz depolama dizini bulunamadı.", color: Colors.red);
         return;
       }
 
+      // İstenen klasör yolu: Download/PDF Reader
       final appDir = Directory(p.join(dir.path, 'Download', 'PDF Reader'));
       if (!await appDir.exists()) {
         await appDir.create(recursive: true);
@@ -108,6 +114,8 @@ class PdfService {
       for (var pickedFile in pickedFiles) {
         final imageFile = File(pickedFile.path);
         final imageBytes = await imageFile.readAsBytes();
+        
+        // Görüntüyü boyutlandırmak için img paketini kullanmak (isteğe bağlı ama önerilir)
         final image = img.decodeImage(imageBytes);
 
         if (image != null) {
@@ -126,7 +134,9 @@ class PdfService {
         }
       }
 
-      if (doc.pages.isNotEmpty) {
+      // HATA DÜZELTİLDİ: pdf paketi Document sınıfının pages özelliği yoktur.
+      // Sadece sayfa ekleme işlemini kontrol etmek yeterlidir.
+      if (pickedFiles.isNotEmpty) { 
         final bytes = await doc.save();
         final fileName = 'GorseldenPDF_${DateTime.now().millisecondsSinceEpoch}.pdf';
         await _saveAndOpenPdf(bytes, fileName);
@@ -154,29 +164,36 @@ class PdfService {
       }
 
       final doc = pw.Document();
+      int pageCount = 0;
 
       for (var file in result.files) {
         final pdfBytes = file.bytes;
         if (pdfBytes != null) {
-          final sourcePdf = PdfDocument.open(pdfBytes);
+          // HATA DÜZELTİLDİ: PdfDocument.open yerine PdfDocument.load(bytes) kullanılır
+          final sourcePdf = PdfDocument.load(pdfBytes); 
+          
           // Kaynak PDF'in tüm sayfalarını tek tek yeni dokümana ekle
-          for (var page in sourcePdf.pages) {
+          for (var i = 0; i < sourcePdf.pdfPageList.pages.length; i++) {
+            final page = sourcePdf.pdfPageList.pages[i];
+
             doc.addPage(pw.Page(
               pageFormat: PdfPageFormat.a4,
               build: (pw.Context context) {
                 return pw.FullPage(
                   ignoreMargins: true,
                   child: pw.Container(
-                    child: pw.Page.fromPage(sourcePdf, page.pageNumber),
+                    // HATA DÜZELTİLDİ: Page.fromPage metodu yerine doğru yapı kullanılıyor
+                    child: pw.Page.fromDocument(sourcePdf, i + 1),
                   ),
                 );
               },
             ));
+            pageCount++;
           }
         }
       }
       
-      if (doc.pages.isNotEmpty) {
+      if (pageCount > 0) { // En az bir sayfa eklendi mi?
         final bytes = await doc.save();
         final fileName = 'BirlestirilmisPDF_${DateTime.now().millisecondsSinceEpoch}.pdf';
         await _saveAndOpenPdf(bytes, fileName);
@@ -205,20 +222,38 @@ class TtsService {
     flutterTts.setSpeechRate(0.5); // Okuma hızını ayarla
     
     flutterTts.setCompletionHandler(() {
-      isPlaying = false;
+      if (context.mounted) {
+        setState(() {
+          isPlaying = false;
+        });
+      }
     });
 
     flutterTts.setErrorHandler((msg) {
       _showSnackbar(context, 'TTS Hatası: $msg', color: Colors.red);
-      isPlaying = false;
+      if (context.mounted) {
+        setState(() {
+          isPlaying = false;
+        });
+      }
     });
   }
+
+  // setState'i kullanabilmek için context.mounted kontrolü ve setState fonskiyonu
+  void setState(VoidCallback fn) {
+    if (context.mounted && (context as State).mounted) {
+      (context as State).setState(fn);
+    }
+  }
+
 
   /// PDF'ten metni çeker ve okumaya başlar.
   Future<void> speakPdf() async {
     if (isPlaying) {
       await flutterTts.stop();
-      isPlaying = false;
+      setState(() {
+        isPlaying = false;
+      });
       _showSnackbar(context, "Sesli okuma durduruldu.", color: Colors.orange);
       return;
     }
@@ -232,26 +267,29 @@ class TtsService {
         allowMultiple: false,
       );
 
-      if (result == null || result.files.single.path == null) {
+      final pdfPath = result?.files.single.path;
+
+      if (pdfPath == null) {
         _showSnackbar(context, "PDF seçimi iptal edildi.", color: Colors.orange);
         return;
       }
 
-      final pdfPath = result.files.single.path!;
       _showSnackbar(context, "Metin PDF'ten çıkarılıyor, lütfen bekleyin...", color: Colors.blue);
 
-      // Metni PDF'ten oku
-      String text = await ReadPdfText.get=='Axtarışda metin tapılamadı.';
-
+      // HATA DÜZELTİLDİ: Metin çekme fonksiyonu doğru kullanılıyor.
+      String text = await ReadPdfText.getPDFtext(pdfPath); 
+      
       if (text.trim().isEmpty) {
-        _showSnackbar(context, "PDF'ten okunabilir metin çıkarılamadı.", color: Colors.orange);
+        _showSnackbar(context, "PDF'ten okunabilir metin çıkarılamadı. Dosya şifreli olabilir veya sadece resim içerebilir.", color: Colors.orange);
         return;
       }
       
       // Metin okuma
       int resultTts = await flutterTts.speak(text);
       if (resultTts == 1) {
-        isPlaying = true;
+        setState(() {
+          isPlaying = true;
+        });
         _showSnackbar(context, "Sesli okuma başlatıldı.", color: Colors.green);
       } else {
         _showSnackbar(context, "Sesli okuma başlatılamadı.", color: Colors.red);
@@ -291,8 +329,9 @@ class _ToolsScreenState extends State<ToolsScreen> {
   @override
   void initState() {
     super.initState();
+    // TtsService, setState yapabilmek için stateful widget'ın context'ini alır.
     _pdfService = PdfService(context);
-    _ttsService = TtsService(context);
+    _ttsService = TtsService(context); 
   }
 
   @override
@@ -304,9 +343,8 @@ class _ToolsScreenState extends State<ToolsScreen> {
   // PDF Doldur & İmzala için geçici yer tutucu (UI'ı gösterir)
   void _showSignaturePad() {
     _showSnackbar(context, "İmza atma paneli yükleniyor...", color: Colors.blueGrey);
-    // Bu kısım normalde bir dialog içinde HandSignature widget'ı açardı.
-    // Şimdilik sadece uyarı gösteriliyor.
-    _showSnackbar(context, "Bu özellik için özel bir imza ekranı gereklidir. (Yakında) ✍️", color: Colors.orange);
+    // Burada HandSignature paketi kullanılarak imzalanacak.
+    _showSnackbar(context, "Bu özellik için özel bir imza ekranı ve imzanın PDF üzerine yerleştirilmesi mantığı gereklidir. (Yakında) ✍️", color: Colors.orange);
   }
 
   // Yakında Eklenecek Özellikler için geçici uyarı
@@ -321,37 +359,43 @@ class _ToolsScreenState extends State<ToolsScreen> {
         'icon': Icons.edit,
         'name': 'PDF Düzenle',
         'color': const Color(0xFFFFEBEE),
-        'onTap': () => _showComingSoon('PDF Düzenleme (Annotasyon)')
+        'onTap': () => _showComingSoon('PDF Düzenleme (Annotasyon)'),
+        'status': 'Geliştiriliyor',
       },
       {
         'icon': Icons.volume_up,
         'name': 'Sesli okuma',
         'color': const Color(0xFFF3E5F5),
-        'onTap': () => _ttsService.speakPdf(), // İŞLEVSEL
+        'onTap': () => _ttsService.speakPdf(), 
+        'status': _ttsService.isPlaying ? 'Durdur' : 'Çalışıyor', // TTS durumunu göster
       },
       {
         'icon': Icons.edit_document,
         'name': 'PDF Doldur & İmzala',
         'color': const Color(0xFFE8F5E8),
-        'onTap': () => _showSignaturePad(), // Yarı İŞLEVSEL (Uyarı gösterir)
+        'onTap': () => _showSignaturePad(), 
+        'status': 'Geliştiriliyor',
       },
       {
         'icon': Icons.picture_as_pdf,
         'name': 'Görselden PDF Oluştur',
         'color': const Color(0xFFE3F2FD),
-        'onTap': () => _pdfService.createPdfFromImages(), // İŞLEVSEL
+        'onTap': () => _pdfService.createPdfFromImages(), 
+        'status': 'Çalışıyor',
       },
       {
         'icon': Icons.layers,
         'name': 'Sayfaları organize et',
         'color': const Color(0xFFFFF3E0),
-        'onTap': () => _showComingSoon('Sayfa Organizasyonu')
+        'onTap': () => _showComingSoon('Sayfa Organizasyonu'),
+        'status': 'Geliştiriliyor',
       },
       {
         'icon': Icons.merge,
         'name': 'Dosyaları birleştirme',
         'color': const Color(0xFFE0F2F1),
-        'onTap': () => _pdfService.mergePdfs(), // İŞLEVSEL
+        'onTap': () => _pdfService.mergePdfs(), 
+        'status': 'Çalışıyor',
       },
     ];
 
@@ -366,9 +410,11 @@ class _ToolsScreenState extends State<ToolsScreen> {
       itemCount: tools.length,
       itemBuilder: (context, index) {
         final tool = tools[index];
+        bool isWorking = tool['status'] == 'Çalışıyor' || tool['status'] == 'Durdur';
+        
         return Card(
-          elevation: 4, // Gölgeyi artırdım
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), // Köşeleri yuvarladım
+          elevation: 4, 
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), 
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: tool['onTap'] as Function(),
@@ -378,7 +424,7 @@ class _ToolsScreenState extends State<ToolsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 64, // Boyutu büyüttüm
+                    width: 64, 
                     height: 64,
                     decoration: BoxDecoration(
                       color: tool['color'] as Color,
@@ -392,26 +438,30 @@ class _ToolsScreenState extends State<ToolsScreen> {
                         ),
                       ],
                     ),
-                    child: Icon(tool['icon'] as IconData, color: const Color(0xFFD32F2F), size: 36), // İkonu büyüttüm
+                    child: Icon(
+                      tool['icon'] as IconData, 
+                      color: isWorking ? const Color(0xFFD32F2F) : Colors.grey, // Çalışmayanlara gri ton
+                      size: 36
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     tool['name'] as String,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16, 
-                      fontWeight: FontWeight.w700, // Daha kalın
-                      color: Color(0xFFD32F2F),
+                      fontWeight: FontWeight.w700, 
+                      color: isWorking ? const Color(0xFFD32F2F) : Colors.grey.shade700,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    (tool['name'] as String).contains('Yakında') ? 'Geliştiriliyor' : 'Çalışıyor',
+                    tool['status'] as String,
                     style: TextStyle(
                       fontSize: 12,
-                      color: (tool['name'] as String).contains('Yakında') ? Colors.red.shade400 : Colors.green.shade600,
+                      color: isWorking ? Colors.green.shade600 : Colors.red.shade400,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
