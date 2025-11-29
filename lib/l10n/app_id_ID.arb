@@ -1,7 +1,6 @@
 {
   "@@locale": "id_ID",
   
-  // App & General
   "appTitle": "Pembaca PDF",
   "appSubtitle": "Penampil & Editor",
   "devSoftware": "Dev Software",
@@ -20,23 +19,19 @@
   "warning": "Peringatan",
   "info": "Informasi",
   
-  // Main Tabs
   "home": "Beranda",
   "tools": "Alat", 
   "files": "File",
   
-  // Home Sub Tabs
   "onDevice": "Di Perangkat",
   "recent": "Terbaru",
   "favorites": "Favorit",
   
-  // Drawer Menu
   "about": "Tentang",
   "helpAndSupport": "Bantuan & Dukungan",
   "languages": "Bahasa",
   "privacy": "Privasi",
   
-  // File Operations
   "fileSelection": "Pemilihan File",
   "pickFile": "Pilih File",
   "scanAgain": "Pindai Ulang",
@@ -47,14 +42,12 @@
   "filePrinted": "File Dicetak",
   "fileSaved": "File Disimpan",
   
-  // Search & Filter
   "searchPdfs": "Cari di PDF...",
   "searchHistory": "Riwayat Pencarian",
   "clearHistory": "Hapus Riwayat",
   "noResults": "Tidak Ada Hasil Ditemukan",
   "searchResults": "Hasil Pencarian",
   
-  // Permissions
   "permissionRequired": "Izin Diperlukan",
   "fileAccessPermission": "Izin Akses File",
   "grantPermission": "Berikan Izin",
@@ -62,18 +55,15 @@
   "permissionDenied": "Izin Ditolak",
   "permissionGranted": "Izin Diberikan",
   
-  // FAB Menu
   "selectFile": "Pilih File",
   "scan": "Pindai",
   "fromImage": "Dari Gambar",
   
-  // Cloud Services
   "cloudStorage": "Penyimpanan Cloud",
   "emailIntegration": "Integrasi Email",
   "pdfsFromEmails": "PDF dari Email",
   "browseForMoreFiles": "Jelajahi untuk File Lainnya",
   
-  // Tools Screen
   "pdfMerger": "Penggabung PDF",
   "pdfSigner": "Penanda Tangan PDF", 
   "pdfCompressor": "Pemampat PDF",
@@ -85,7 +75,6 @@
   "organizePages": "Atur Halaman",
   "addImageToPdf": "Tambah Gambar ke PDF",
   
-  // Tool Loading States
   "toolLoading": "Alat Sedang Dimuat...",
   "mergerLoading": "Penggabung PDF Sedang Dimuat...",
   "signerLoading": "Penanda Tangan PDF Sedang Dimuat...",
@@ -98,7 +87,6 @@
   "pageOrganizerLoading": "Pengatur Halaman Sedang Dimuat...",
   "imageInserterLoading": "Penyisip Gambar Sedang Dimuat...",
   
-  // Viewer Screen
   "pdfViewer": "Penampil PDF",
   "pdfLoading": "PDF Sedang Dimuat...",
   "page": "Halaman",
@@ -109,14 +97,12 @@
   "fitToPage": "Sesuaikan Halaman",
   "actualSize": "Ukuran Sebenarnya",
   
-  // About Dialog
   "aboutPdfReader": "Tentang Pembaca PDF",
   "advancedPdfViewing": "Aplikasi penampilan dan manajemen PDF yang canggih.",
   "technologiesUsed": "Teknologi yang Digunakan",
   "licenseInfo": "Informasi Lisensi",
   "openSourceTechnologies": "Aplikasi ini dikembangkan menggunakan teknologi sumber terbuka.",
   
-  // Help & Support
   "helpSupport": "Bantuan & Dukungan",
   "describeIssue": "Jelaskan masalah atau saran Anda:",
   "yourEmail": "Alamat Email Anda",
@@ -125,7 +111,6 @@
   "fillAllFields": "Harap isi semua bidang",
   "messageRedirecting": "Pesan Anda sedang dialihkan ke aplikasi email...",
   
-  // Language Settings
   "languageSettings": "Pengaturan Bahasa",
   "appLanguage": "Bahasa Aplikasi",
   "pdfViewerLanguage": "Bahasa Penampil PDF",
@@ -137,12 +122,10 @@
   "restartLater": "Nanti",
   "restartNow": "Mulai Ulang Sekarang",
   
-  // Privacy
   "privacyPolicy": "Kebijakan Privasi",
   "comingSoon": "Segera Hadir",
   "featureComingSoon": "Fitur ini akan segera hadir! 🚀",
   
-  // Notifications & Alerts
   "pdfSavedSuccess": "PDF berhasil disimpan",
   "pdfSaveError": "Kesalahan menyimpan PDF",
   "pdfOpenError": "Kesalahan membuka PDF",
@@ -152,30 +135,25 @@
   "deleteError": "Kesalahan menghapus",
   "permissionError": "Kesalahan izin",
   
-  // Empty States
   "noPdfFiles": "Tidak ada file PDF ditemukan",
   "noRecentFiles": "Belum ada file terbaru",
   "noFavorites": "Belum ada favorit",
   "noSearchResults": "Tidak ada hasil pencarian ditemukan",
   
-  // File Info
   "fileSize": "Ukuran File",
   "modifiedDate": "Tanggal Modifikasi",
   "fileInfo": "Informasi File",
   
-  // Confirmation Dialogs
   "confirmDelete": "Konfirmasi Hapus",
   "deleteConfirmation": "Apakah Anda yakin ingin menghapus \"{fileName}\"? Tindakan ini tidak dapat dibatalkan.",
   "confirmRename": "Konfirmasi Ubah Nama",
   "newFileName": "Nama file baru",
   
-  // Cloud Service Names
   "googleDrive": "Google Drive",
   "oneDrive": "OneDrive", 
   "dropbox": "Dropbox",
   "gmail": "Gmail",
   
-  // Feature Tags
   "premium": "Premium",
   "new": "Baru",
   "popular": "Populer",
