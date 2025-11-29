@@ -16,7 +16,8 @@ import 'package:printing/printing.dart';
 import 'package:open_file/open_file.dart';
 import 'package:sqflite/sqflite.dart';
 
-// Yeni oluşturduğumuz dosyayı import ediyoruz
+// Import generated localization
+import 'gen/l10n.dart';
 import 'tools_screen.dart';
 import 'app_languages.dart';
 
@@ -97,6 +98,11 @@ class PdfManagerApp extends StatelessWidget {
     return MaterialApp(
       title: 'PDF Reader',
       debugShowCheckedModeBanner: false,
+      
+      // Localization ayarları
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      
       theme: ThemeData(
         primarySwatch: Colors.red,
         primaryColor: Color(0xFFD32F2F),
@@ -212,9 +218,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Database? _database;
   final ThemeManager _themeManager = ThemeManager();
   final LanguageProvider _languageProvider = LanguageProvider();
-
-  final List<String> _tabTitles = ['Ana Sayfa', 'Araçlar', 'Dosyalar'];
-  final List<String> _homeTabTitles = ['Cihazda', 'Son Kullanılanlar', 'Favoriler'];
 
   @override
   void initState() {
@@ -384,7 +387,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ PDF açılırken hata: $e')),
+          SnackBar(content: Text('❌ ${AppLocalizations.of(context).pdfOpenError}: $e')),
         );
       }
     }
@@ -427,7 +430,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ PDF açılırken hata: $e')),
+        SnackBar(content: Text('❌ ${AppLocalizations.of(context).pdfOpenError}: $e')),
       );
     }
   }
@@ -490,12 +493,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Dosya Erişim İzni Gerekli', style: TextStyle(color: Color(0xFFD32F2F))),
-        content: Text('Tüm PDF dosyalarını listelemek için dosya erişim izni gerekiyor. Ayarlardan izin verebilirsiniz.'),
+        title: Text(AppLocalizations.of(context).permissionRequired, style: TextStyle(color: Color(0xFFD32F2F))),
+        content: Text(AppLocalizations.of(context).fileAccessPermission),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Vazgeç'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
@@ -503,7 +506,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Navigator.pop(context);
               openAppSettings();
             },
-            child: Text('Ayarlara Git', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context).goToSettings, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -575,7 +578,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Dosya seçilirken hata: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context).fileSelection} hatası: $e')),
       );
     }
   }
@@ -585,7 +588,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       final file = File(path);
       if (!await file.exists()) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Dosya bulunamadı: ${p.basename(path)}')),
+          SnackBar(content: Text('${AppLocalizations.of(context).fileNotFound}: ${p.basename(path)}')),
         );
         return;
       }
@@ -602,7 +605,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('PDF açılırken hata: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context).pdfOpenError}: $e')),
       );
     }
   }
@@ -610,9 +613,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _shareFile(String filePath) async {
     try {
       await Share.shareFiles([filePath], text: 'PDF Dosyası');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).fileShared)),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Paylaşım hatası: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context).fileShareError}: $e')),
       );
     }
   }
@@ -622,9 +628,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       final file = File(filePath);
       final data = await file.readAsBytes();
       await Printing.layoutPdf(onLayout: (_) => data);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).filePrinted)),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Yazdırma hatası: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context).printError}: $e')),
       );
     }
   }
@@ -634,12 +643,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Dosyayı Sil'),
-        content: Text('"$fileName" dosyasını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'),
+        title: Text(AppLocalizations.of(context).confirmDelete),
+        content: Text(AppLocalizations.of(context).deleteConfirmation.replaceFirst('{fileName}', fileName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('İptal'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -654,15 +663,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   _recentFiles.remove(filePath);
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Dosya silindi: $fileName')),
+                  SnackBar(content: Text('${AppLocalizations.of(context).fileDeleted}: $fileName')),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Silme hatası: $e')),
+                  SnackBar(content: Text('${AppLocalizations.of(context).deleteError}: $e')),
                 );
               }
             },
-            child: Text('Sil', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context).delete, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -740,12 +749,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Icon(Icons.folder_open, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              'Dosyalarınıza Erişim İzni Verin',
+              AppLocalizations.of(context).permissionRequired,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
             ),
             SizedBox(height: 8),
             Text(
-              'Lütfen dosyalarınıza erişim izni verin\nAyarlar\'dan erişin.',
+              AppLocalizations.of(context).fileAccessPermission,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -757,7 +766,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
-              child: Text('Tüm Dosya Erişim İzni Ver'),
+              child: Text(AppLocalizations.of(context).grantPermission),
             ),
           ],
         ),
@@ -772,7 +781,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: [
           CircularProgressIndicator(color: Color(0xFFD32F2F)),
           SizedBox(height: 16),
-          Text('PDF dosyaları taranıyor...', style: TextStyle(color: Color(0xFFD32F2F))),
+          Text(AppLocalizations.of(context).loading, style: TextStyle(color: Color(0xFFD32F2F))),
         ],
       ),
     );
@@ -787,20 +796,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           SizedBox(height: 16),
           Text(
             _isSearchMode && _searchController.text.isNotEmpty 
-                ? 'Arama sonucu bulunamadı'
-                : 'PDF dosyası bulunamadı',
+                ? AppLocalizations.of(context).noResults
+                : AppLocalizations.of(context).noPdfFiles,
             style: TextStyle(fontSize: 18, color: Colors.grey),
           ),
           SizedBox(height: 16),
           ElevatedButton(
             onPressed: _scanDeviceForPdfs,
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
-            child: Text('Yeniden Tara', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context).scanAgain, style: TextStyle(color: Colors.white)),
           ),
           SizedBox(height: 8),
           TextButton(
             onPressed: _pickPdfFile,
-            child: Text('Dosya Seç', style: TextStyle(color: Color(0xFFD32F2F))),
+            child: Text(AppLocalizations.of(context).selectFile, style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
@@ -833,10 +842,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Arama Geçmişi', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
+                Text(AppLocalizations.of(context).searchHistory, style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
                 TextButton(
                   onPressed: _clearSearchHistory,
-                  child: Text('Temizle', style: TextStyle(color: Colors.grey)),
+                  child: Text(AppLocalizations.of(context).clearHistory, style: TextStyle(color: Colors.grey)),
                 ),
               ],
             ),
@@ -920,10 +929,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             PopupMenuButton<String>(
               onSelected: (value) => _handleFileAction(value, filePath),
               itemBuilder: (BuildContext context) => [
-                PopupMenuItem(value: 'share', child: Text('Paylaş')),
-                PopupMenuItem(value: 'rename', child: Text('Yeniden Adlandır')),
-                PopupMenuItem(value: 'print', child: Text('Yazdır')),
-                PopupMenuItem(value: 'delete', child: Text('Sil', style: TextStyle(color: Colors.red))),
+                PopupMenuItem(value: 'share', child: Text(AppLocalizations.of(context).share)),
+                PopupMenuItem(value: 'rename', child: Text(AppLocalizations.of(context).rename)),
+                PopupMenuItem(value: 'print', child: Text(AppLocalizations.of(context).print)),
+                PopupMenuItem(value: 'delete', child: Text(AppLocalizations.of(context).delete, style: TextStyle(color: Colors.red))),
               ],
             ),
           ],
@@ -956,18 +965,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Dosyayı Yeniden Adlandır'),
+        title: Text(AppLocalizations.of(context).confirmRename),
         content: TextField(
           controller: renameController,
           decoration: InputDecoration(
-            labelText: 'Yeni dosya adı',
+            labelText: AppLocalizations.of(context).newFileName,
             suffixText: '.pdf',
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('İptal'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
@@ -985,15 +994,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 });
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Dosya yeniden adlandırıldı')),
+                  SnackBar(content: Text(AppLocalizations.of(context).fileRenamed)),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Yeniden adlandırma hatası: $e')),
+                  SnackBar(content: Text('${AppLocalizations.of(context).renameError}: $e')),
                 );
               }
             },
-            child: Text('Kaydet', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context).save, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -1009,7 +1018,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Icon(Icons.history, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              'Henüz son açılan dosya yok',
+              AppLocalizations.of(context).noRecentFiles,
               style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             SizedBox(height: 8),
@@ -1037,7 +1046,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Icon(Icons.star, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              'Henüz favori dosyanız yok',
+              AppLocalizations.of(context).noFavorites,
               style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             SizedBox(height: 8),
@@ -1059,7 +1068,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$feature - Yakında eklenecek! 🚀'),
+        content: Text('$feature - ${AppLocalizations.of(context).comingSoon}! 🚀'),
         backgroundColor: Color(0xFFD32F2F),
       ),
     );
@@ -1070,25 +1079,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       children: [
         Padding(
           padding: EdgeInsets.all(16),
-          child: Text('Dosyalar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
+          child: Text(AppLocalizations.of(context).files, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Text('Bulut Depolama', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
+          child: Text(AppLocalizations.of(context).cloudStorage, style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
         ),
-        _buildCloudItem('Google Drive', 'assets/icon/drive.png', false, () => _launchCloudService('Google Drive')),
-        _buildCloudItem('OneDrive', 'assets/icon/onedrive.png', false, () => _launchCloudService('OneDrive')),
-        _buildCloudItem('Dropbox', 'assets/icon/dropbox.png', false, () => _launchCloudService('Dropbox')),
+        _buildCloudItem(AppLocalizations.of(context).googleDrive, 'assets/icon/drive.png', false, () => _launchCloudService(AppLocalizations.of(context).googleDrive)),
+        _buildCloudItem(AppLocalizations.of(context).oneDrive, 'assets/icon/onedrive.png', false, () => _launchCloudService(AppLocalizations.of(context).oneDrive)),
+        _buildCloudItem(AppLocalizations.of(context).dropbox, 'assets/icon/dropbox.png', false, () => _launchCloudService(AppLocalizations.of(context).dropbox)),
         
         Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: Text('E-posta Entegrasyonu', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
+          child: Text(AppLocalizations.of(context).emailIntegration, style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
         ),
         _buildGmailItem(),
         
         Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: _buildCloudItem('Daha Fazla Dosya İçin Göz Atın', Icons.folder_open, true, _pickPdfFile),
+          child: _buildCloudItem(AppLocalizations.of(context).browseForMoreFiles, Icons.folder_open, true, _pickPdfFile),
         ),
       ],
     );
@@ -1096,10 +1105,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _launchCloudService(String service) async {
     final urls = {
-      'Google Drive': 'https://drive.google.com',
-      'OneDrive': 'https://onedrive.live.com',
-      'Dropbox': 'https://www.dropbox.com',
-      'Gmail': 'https://gmail.com',
+      AppLocalizations.of(context).googleDrive: 'https://drive.google.com',
+      AppLocalizations.of(context).oneDrive: 'https://onedrive.live.com',
+      AppLocalizations.of(context).dropbox: 'https://www.dropbox.com',
+      AppLocalizations.of(context).gmail: 'https://gmail.com',
     };
     if (urls.containsKey(service)) {
       final url = Uri.parse(urls[service]!);
@@ -1133,12 +1142,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('E-postalardaki PDF\'ler', style: TextStyle(fontWeight: FontWeight.w500)),
-            Text('Gmail', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(AppLocalizations.of(context).pdfsFromEmails, style: TextStyle(fontWeight: FontWeight.w500)),
+            Text(AppLocalizations.of(context).gmail, style: TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
         trailing: Icon(Icons.add, color: Color(0xFFD32F2F)),
-        onTap: () => _launchCloudService('Gmail'),
+        onTap: () => _launchCloudService(AppLocalizations.of(context).gmail),
       ),
     );
   }
@@ -1154,11 +1163,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             right: 0,
             child: Column(
               children: [
-                _buildSubFabItem('Dosya Seç', Icons.attach_file, _pickPdfFile),
+                _buildSubFabItem(AppLocalizations.of(context).selectFile, Icons.attach_file, _pickPdfFile),
                 SizedBox(height: 12),
-                _buildSubFabItem('Tara', Icons.document_scanner, () => _showComingSoon('Tarama')),
+                _buildSubFabItem(AppLocalizations.of(context).scan, Icons.document_scanner, () => _showComingSoon('Tarama')),
                 SizedBox(height: 12),
-                _buildSubFabItem('Görsel', Icons.image, () => _showComingSoon('Görselden PDF')),
+                _buildSubFabItem(AppLocalizations.of(context).fromImage, Icons.image, () => _showComingSoon('Görselden PDF')),
               ],
             ),
           ),
@@ -1244,17 +1253,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: 12),
                     Text('Dev Software', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                    Text('PDF Reader - Görüntüleyici & Editör', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                    Text(AppLocalizations.of(context).appSubtitle, style: TextStyle(fontSize: 12, color: Colors.white70)),
                   ],
                 ),
               ),
             ),
           ),
-          _buildDrawerItem(Icons.info, 'PDF Reader Hakkında', _showAboutDialog),
-          _buildDrawerItem(Icons.help, 'Yardım ve Destek', _showHelpSupport),
+          _buildDrawerItem(Icons.info, AppLocalizations.of(context).about, _showAboutDialog),
+          _buildDrawerItem(Icons.help, AppLocalizations.of(context).helpAndSupport, _showHelpSupport),
           Divider(),
-          _buildDrawerSubItem('Diller', _showLanguageSettings),
-          _buildDrawerSubItem('Gizlilik', _showPrivacyPolicy),
+          _buildDrawerSubItem(AppLocalizations.of(context).languages, _showLanguageSettings),
+          _buildDrawerSubItem(AppLocalizations.of(context).privacy, _showPrivacyPolicy),
         ],
       ),
     );
@@ -1266,18 +1275,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Yardım ve Destek', style: TextStyle(color: Color(0xFFD32F2F))),
+        title: Text(AppLocalizations.of(context).helpSupport, style: TextStyle(color: Color(0xFFD32F2F))),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Sorununuzu veya önerinizi bize iletin:'),
+              Text(AppLocalizations.of(context).describeIssue),
               SizedBox(height: 16),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(
-                  labelText: 'E-posta Adresiniz',
+                  labelText: AppLocalizations.of(context).yourEmail,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -1286,7 +1295,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 controller: messageController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  labelText: 'Mesajınız',
+                  labelText: AppLocalizations.of(context).yourMessage,
                   border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
@@ -1297,14 +1306,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('İptal'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
             onPressed: () {
               if (messageController.text.trim().isEmpty || emailController.text.trim().isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Lütfen tüm alanları doldurun')),
+                  SnackBar(content: Text(AppLocalizations.of(context).fillAllFields)),
                 );
                 return;
               }
@@ -1319,10 +1328,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               launchUrl(emailLaunchUri);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Mesajınız e-posta uygulamasına yönlendiriliyor...')),
+                SnackBar(content: Text(AppLocalizations.of(context).messageRedirecting)),
               );
             },
-            child: Text('Gönder', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context).send, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -1334,22 +1343,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showPrivacyPolicy() {
-    _showComingSoon('Gizlilik Politikası');
+    _showComingSoon(AppLocalizations.of(context).privacyPolicy);
   }
 
   void _showAboutDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('PDF Reader Hakkında', style: TextStyle(color: Color(0xFFD32F2F))),
+        title: Text(AppLocalizations.of(context).aboutPdfReader, style: TextStyle(color: Color(0xFFD32F2F))),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('PDF Reader v1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('${AppLocalizations.of(context).appTitle} v1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text('Gelişmiş PDF görüntüleme ve yönetim uygulaması.'),
+              Text(AppLocalizations.of(context).advancedPdfViewing),
               SizedBox(height: 16),
               Text('© 2024 Dev Software'),
             ],
@@ -1358,7 +1367,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
+            child: Text(AppLocalizations.of(context).close, style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
@@ -1399,7 +1408,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         focusNode: _searchFocusNode,
         style: TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          hintText: 'PDF dosyalarında ara...',
+          hintText: AppLocalizations.of(context).searchPdfs,
           hintStyle: TextStyle(color: Colors.white70),
           border: InputBorder.none,
         ),
@@ -1422,8 +1431,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   PreferredSizeWidget _buildNormalAppBar() {
+    final appLocalizations = AppLocalizations.of(context);
+    
+    final List<String> tabTitles = [appLocalizations.home, appLocalizations.tools, appLocalizations.files];
+    final List<String> homeTabTitles = [appLocalizations.onDevice, appLocalizations.recent, appLocalizations.favorites];
+
     return AppBar(
-      title: Text(_tabTitles[_currentTabIndex]),
+      title: Text(tabTitles[_currentTabIndex]),
       actions: [
         if (_currentTabIndex == 0) ...[
           IconButton(
@@ -1445,7 +1459,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     : Colors.white,
                 child: TabBar(
                   controller: _homeSubTabController,
-                  tabs: _homeTabTitles.map((title) => Tab(
+                  tabs: homeTabTitles.map((title) => Tab(
                     child: Text(
                       title,
                       style: TextStyle(
@@ -1501,15 +1515,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: 'Ana Sayfa',
+              label: AppLocalizations.of(context).home,
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.build),
-              label: 'Araçlar',
+              label: AppLocalizations.of(context).tools,
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.folder),
-              label: 'Dosyalar',
+              label: AppLocalizations.of(context).files,
             ),
           ],
         ),
@@ -1594,7 +1608,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('PDF kaydedildi: $newFileName'),
+            content: Text('${AppLocalizations.of(context).pdfSavedSuccess}: $newFileName'),
             backgroundColor: Colors.green,
           ),
         );
@@ -1607,7 +1621,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('PDF kaydedilirken hata: $e'),
+            content: Text('${AppLocalizations.of(context).pdfSaveError}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -1704,7 +1718,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                       children: [
                         CircularProgressIndicator(color: Color(0xFFD32F2F)),
                         SizedBox(height: 20),
-                        Text('PDF Yükleniyor...', style: TextStyle(color: Color(0xFFD32F2F))),
+                        Text(AppLocalizations.of(context).pdfLoading, style: TextStyle(color: Color(0xFFD32F2F))),
                       ],
                     ),
                   ),
