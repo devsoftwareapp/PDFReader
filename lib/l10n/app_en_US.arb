@@ -1,7 +1,6 @@
 {
   "@@locale": "en_US",
   
-
   "appTitle": "PDF Reader",
   "appSubtitle": "Viewer & Editor",
   "devSoftware": "Dev Software",
@@ -20,23 +19,19 @@
   "warning": "Warning",
   "info": "Information",
   
-  // Main Tabs
   "home": "Home",
   "tools": "Tools", 
   "files": "Files",
   
-  // Home Sub Tabs
   "onDevice": "On Device",
   "recent": "Recent",
   "favorites": "Favorites",
   
-  // Drawer Menu
   "about": "About",
   "helpAndSupport": "Help & Support",
   "languages": "Languages",
   "privacy": "Privacy",
   
-  // File Operations
   "fileSelection": "File Selection",
   "pickFile": "Pick File",
   "scanAgain": "Scan Again",
@@ -47,14 +42,12 @@
   "filePrinted": "File Printed",
   "fileSaved": "File Saved",
   
-  // Search & Filter
   "searchPdfs": "Search PDFs...",
   "searchHistory": "Search History",
   "clearHistory": "Clear History",
   "noResults": "No Results Found",
   "searchResults": "Search Results",
   
-  // Permissions
   "permissionRequired": "Permission Required",
   "fileAccessPermission": "File Access Permission",
   "grantPermission": "Grant Permission",
@@ -62,18 +55,15 @@
   "permissionDenied": "Permission Denied",
   "permissionGranted": "Permission Granted",
   
-  // FAB Menu
   "selectFile": "Select File",
   "scan": "Scan",
   "fromImage": "From Image",
   
-  // Cloud Services
   "cloudStorage": "Cloud Storage",
   "emailIntegration": "Email Integration",
   "pdfsFromEmails": "PDFs from Emails",
   "browseForMoreFiles": "Browse for More Files",
   
-  // Tools Screen
   "pdfMerger": "PDF Merger",
   "pdfSigner": "PDF Signer", 
   "pdfCompressor": "PDF Compressor",
@@ -85,7 +75,6 @@
   "organizePages": "Organize Pages",
   "addImageToPdf": "Add Image to PDF",
   
-  // Tool Loading States
   "toolLoading": "Tool Loading...",
   "mergerLoading": "PDF Merger Loading...",
   "signerLoading": "PDF Signer Loading...",
@@ -98,7 +87,6 @@
   "pageOrganizerLoading": "Page Organizer Loading...",
   "imageInserterLoading": "Image Inserter Loading...",
   
-  // Viewer Screen
   "pdfViewer": "PDF Viewer",
   "pdfLoading": "PDF Loading...",
   "page": "Page",
@@ -109,14 +97,12 @@
   "fitToPage": "Fit to Page",
   "actualSize": "Actual Size",
   
-  // About Dialog
   "aboutPdfReader": "About PDF Reader",
   "advancedPdfViewing": "Advanced PDF viewing and management application.",
   "technologiesUsed": "Technologies Used",
   "licenseInfo": "License Information",
   "openSourceTechnologies": "This application is developed using open source technologies.",
   
-  // Help & Support
   "helpSupport": "Help & Support",
   "describeIssue": "Describe your issue or suggestion:",
   "yourEmail": "Your Email Address",
@@ -125,7 +111,6 @@
   "fillAllFields": "Please fill all fields",
   "messageRedirecting": "Your message is being redirected to email app...",
   
-  // Language Settings
   "languageSettings": "Language Settings",
   "appLanguage": "App Language",
   "pdfViewerLanguage": "PDF Viewer Language",
@@ -137,12 +122,10 @@
   "restartLater": "Later",
   "restartNow": "Restart Now",
   
-  // Privacy
   "privacyPolicy": "Privacy Policy",
   "comingSoon": "Coming Soon",
   "featureComingSoon": "This feature is coming soon! 🚀",
   
-  // Notifications & Alerts
   "pdfSavedSuccess": "PDF saved successfully",
   "pdfSaveError": "Error saving PDF",
   "pdfOpenError": "Error opening PDF",
@@ -152,30 +135,25 @@
   "deleteError": "Delete error",
   "permissionError": "Permission error",
   
-  // Empty States
   "noPdfFiles": "No PDF files found",
   "noRecentFiles": "No recent files yet",
   "noFavorites": "No favorites yet",
   "noSearchResults": "No search results found",
   
-  // File Info
   "fileSize": "File Size",
   "modifiedDate": "Modified Date",
   "fileInfo": "File Information",
   
-  // Confirmation Dialogs
   "confirmDelete": "Confirm Delete",
   "deleteConfirmation": "Are you sure you want to delete \"{fileName}\"? This action cannot be undone.",
   "confirmRename": "Confirm Rename",
   "newFileName": "New file name",
   
-  // Cloud Service Names
   "googleDrive": "Google Drive",
   "oneDrive": "OneDrive", 
   "dropbox": "Dropbox",
   "gmail": "Gmail",
   
-  // Feature Tags
   "premium": "Premium",
   "new": "New",
   "popular": "Popular",
