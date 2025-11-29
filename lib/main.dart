@@ -31,10 +31,10 @@ Future<Map<String, dynamic>?> _getInitialIntent() async {
 }
 
 // Tema yönetimi için
-enum AppTheme { red, blue, green, purple, orange }
+enum AppTheme { system, light, dark }
 
 class ThemeManager with ChangeNotifier {
-  AppTheme _currentTheme = AppTheme.red;
+  AppTheme _currentTheme = AppTheme.system;
 
   AppTheme get currentTheme => _currentTheme;
 
@@ -43,139 +43,17 @@ class ThemeManager with ChangeNotifier {
     notifyListeners();
   }
 
-  ThemeData get themeData {
+  ThemeMode get themeMode {
     switch (_currentTheme) {
-      case AppTheme.blue:
-        return _blueTheme;
-      case AppTheme.green:
-        return _greenTheme;
-      case AppTheme.purple:
-        return _purpleTheme;
-      case AppTheme.orange:
-        return _orangeTheme;
-      case AppTheme.red:
+      case AppTheme.light:
+        return ThemeMode.light;
+      case AppTheme.dark:
+        return ThemeMode.dark;
+      case AppTheme.system:
       default:
-        return _redTheme;
+        return ThemeMode.system;
     }
   }
-
-  Color get primaryColor {
-    switch (_currentTheme) {
-      case AppTheme.blue: return Color(0xFF1976D2);
-      case AppTheme.green: return Color(0xFF388E3C);
-      case AppTheme.purple: return Color(0xFF7B1FA2);
-      case AppTheme.orange: return Color(0xFFF57C00);
-      case AppTheme.red: return Color(0xFFD32F2F);
-      default: return Color(0xFFD32F2F);
-    }
-  }
-
-  static final ThemeData _redTheme = ThemeData(
-    primarySwatch: Colors.red,
-    primaryColor: Color(0xFFD32F2F),
-    scaffoldBackgroundColor: Colors.white,
-    appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFFD32F2F),
-      foregroundColor: Colors.white,
-      elevation: 2,
-      titleTextStyle: TextStyle(
-        color: Colors.white,
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: Color(0xFFD32F2F),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      selectedItemColor: Color(0xFFD32F2F),
-      unselectedItemColor: Colors.grey,
-    ),
-    tabBarTheme: TabBarTheme(
-      labelColor: Color(0xFFD32F2F),
-      unselectedLabelColor: Colors.grey,
-      indicator: UnderlineTabIndicator(
-        borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
-      ),
-    ),
-    cardTheme: CardTheme(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ),
-  );
-
-  static final ThemeData _blueTheme = ThemeData(
-    primarySwatch: Colors.blue,
-    primaryColor: Color(0xFF1976D2),
-    scaffoldBackgroundColor: Colors.white,
-    appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFF1976D2),
-      foregroundColor: Colors.white,
-      elevation: 2,
-    ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: Color(0xFF1976D2),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      selectedItemColor: Color(0xFF1976D2),
-    ),
-  );
-
-  static final ThemeData _greenTheme = ThemeData(
-    primarySwatch: Colors.green,
-    primaryColor: Color(0xFF388E3C),
-    scaffoldBackgroundColor: Colors.white,
-    appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFF388E3C),
-      foregroundColor: Colors.white,
-      elevation: 2,
-    ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: Color(0xFF388E3C),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      selectedItemColor: Color(0xFF388E3C),
-    ),
-  );
-
-  static final ThemeData _purpleTheme = ThemeData(
-    primarySwatch: Colors.purple,
-    primaryColor: Color(0xFF7B1FA2),
-    scaffoldBackgroundColor: Colors.white,
-    appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFF7B1FA2),
-      foregroundColor: Colors.white,
-      elevation: 2,
-    ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: Color(0xFF7B1FA2),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      selectedItemColor: Color(0xFF7B1FA2),
-    ),
-  );
-
-  static final ThemeData _orangeTheme = ThemeData(
-    primarySwatch: Colors.orange,
-    primaryColor: Color(0xFFF57C00),
-    scaffoldBackgroundColor: Colors.white,
-    appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFFF57C00),
-      foregroundColor: Colors.white,
-      elevation: 2,
-    ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: Color(0xFFF57C00),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      selectedItemColor: Color(0xFFF57C00),
-    ),
-  );
 }
 
 void main() async {
@@ -190,8 +68,9 @@ void main() async {
 
 class PdfManagerApp extends StatelessWidget {
   final Map<String, dynamic>? initialIntent;
+  final ThemeManager _themeManager = ThemeManager();
 
-  const PdfManagerApp({super.key, this.initialIntent});
+  PdfManagerApp({super.key, this.initialIntent});
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +105,52 @@ class PdfManagerApp extends StatelessWidget {
             borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
           ),
         ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.red,
+        primaryColor: Color(0xFFD32F2F),
+        scaffoldBackgroundColor: Colors.grey[900],
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.grey[800],
+          foregroundColor: Colors.white,
+          elevation: 2,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFFD32F2F),
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.grey[800],
+          selectedItemColor: Color(0xFFD32F2F),
+          unselectedItemColor: Colors.grey[400],
+        ),
+        tabBarTheme: TabBarTheme(
+          labelColor: Color(0xFFD32F2F),
+          unselectedLabelColor: Colors.grey[400],
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
+          ),
+        ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          color: Colors.grey[800],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+        ),
+      ),
+      themeMode: _themeManager.themeMode,
       home: HomePage(initialIntent: initialIntent),
     );
   }
@@ -1429,7 +1353,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ),
             ),
           ),
-          _buildDrawerItem(Icons.settings, 'Tercihler', _showPreferences),
+          _buildDrawerItem(Icons.brightness_6, 'Tema Ayarları', _showThemeSettings),
           _buildDrawerItem(Icons.help, 'Yardım ve Destek', _showHelpSupport),
           Divider(),
           _buildDrawerSubItem('Diller', _showLanguageSettings),
@@ -1440,87 +1364,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  void _showPreferences() {
+  void _showThemeSettings() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Tema Seçin', style: TextStyle(color: Color(0xFFD32F2F))),
         content: Container(
           width: double.maxFinite,
-          child: GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.5,
-            ),
-            itemCount: AppTheme.values.length,
-            itemBuilder: (context, index) {
-              final theme = AppTheme.values[index];
-              final isSelected = _themeManager.currentTheme == theme;
-              
-              Color getThemeColor() {
-                switch (theme) {
-                  case AppTheme.blue: return Color(0xFF1976D2);
-                  case AppTheme.green: return Color(0xFF388E3C);
-                  case AppTheme.purple: return Color(0xFF7B1FA2);
-                  case AppTheme.orange: return Color(0xFFF57C00);
-                  case AppTheme.red:
-                  default: return Color(0xFFD32F2F);
-                }
-              }
-              
-              String getThemeName() {
-                switch (theme) {
-                  case AppTheme.blue: return 'Mavi';
-                  case AppTheme.green: return 'Yeşil';
-                  case AppTheme.purple: return 'Mor';
-                  case AppTheme.orange: return 'Turuncu';
-                  case AppTheme.red: return 'Kırmızı';
-                  default: return 'Kırmızı';
-                }
-              }
-              
-              return Card(
-                color: isSelected ? getThemeColor().withOpacity(0.1) : Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: isSelected ? getThemeColor() : Colors.grey.shade300,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    _themeManager.setTheme(theme);
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('$getThemeName tema uygulandı')),
-                    );
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: getThemeColor(),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(getThemeName(), style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: getThemeColor(),
-                      )),
-                    ],
-                  ),
-                ),
-              );
-            },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildThemeOption('Cihaz Varsayılanı', AppTheme.system, Icons.phone_android),
+              SizedBox(height: 12),
+              _buildThemeOption('Light Mode', AppTheme.light, Icons.light_mode),
+              SizedBox(height: 12),
+              _buildThemeOption('Dark Mode', AppTheme.dark, Icons.dark_mode),
+            ],
           ),
         ),
         actions: [
@@ -1529,6 +1388,36 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(String title, AppTheme theme, IconData icon) {
+    final isSelected = _themeManager.currentTheme == theme;
+    
+    return Card(
+      color: isSelected ? Color(0xFFFFEBEE) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected ? Color(0xFFD32F2F) : Colors.grey.shade300,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: isSelected ? Color(0xFFD32F2F) : Colors.grey),
+        title: Text(title, style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: isSelected ? Color(0xFFD32F2F) : Colors.black,
+        )),
+        trailing: isSelected ? Icon(Icons.check, color: Color(0xFFD32F2F)) : null,
+        onTap: () {
+          _themeManager.setTheme(theme);
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$title teması uygulandı')),
+          );
+        },
       ),
     );
   }
@@ -1757,14 +1646,37 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ),
       ],
       bottom: _currentTabIndex == 0 
-          ? TabBar(
-              controller: TabController(
-                length: 3,
-                vsync: this,
-                initialIndex: _currentHomeTabIndex,
+          ? PreferredSize(
+              preferredSize: Size.fromHeight(48.0),
+              child: Container(
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.grey[800] 
+                    : Colors.white,
+                child: TabBar(
+                  controller: TabController(
+                    length: 3,
+                    vsync: this,
+                    initialIndex: _currentHomeTabIndex,
+                  ),
+                  onTap: (index) => setState(() => _currentHomeTabIndex = index),
+                  tabs: _homeTabTitles.map((title) => Tab(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white 
+                            : Color(0xFFD32F2F),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  )).toList(),
+                  indicatorColor: Color(0xFFD32F2F),
+                  labelColor: Color(0xFFD32F2F),
+                  unselectedLabelColor: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.grey[400] 
+                      : Colors.grey,
+                ),
               ),
-              onTap: (index) => setState(() => _currentHomeTabIndex = index),
-              tabs: _homeTabTitles.map((title) => Tab(text: title)).toList(),
             )
           : null,
     );
