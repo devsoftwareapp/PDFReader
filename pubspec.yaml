@@ -53,7 +53,7 @@ flutter:
     - assets/web/pdf_res.html
     - assets/web/pdf_metin_ekle.html
     - assets/web/organize.html
-    - assets/web/ekle_cikar.html
+    - assets/web/sikistirma.html 
 
    #PDFjs zorunlu dosyalari
   
