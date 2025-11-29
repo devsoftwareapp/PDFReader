@@ -55,6 +55,9 @@ flutter:
   generate: true
 
   assets:
+    # --- L10N DOSYALARI ---
+    - assets/l10n/
+
     # --- TOOLS HTML DOSYALARI ---
     - assets/web/birlestirme.html
     - assets/web/imza.html
