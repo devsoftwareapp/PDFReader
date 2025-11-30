@@ -1,6 +1,7 @@
 // lib/gen/l10n.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // ← BU EKLENDİ
 
 class AppLocalizations {
   final Locale locale;
@@ -13,7 +14,6 @@ class AppLocalizations {
 
   static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
-  // ✅ BU SATIRLARI EKLEYİN:
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
     delegate,
     GlobalMaterialLocalizations.delegate,
