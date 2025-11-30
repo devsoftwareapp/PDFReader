@@ -1476,70 +1476,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           _buildDrawerItem(Icons.info, 'PDF Reader Hakkında', _showAboutDialog),
           _buildDrawerItem(Icons.help, 'Yardım ve Destek', _showHelpSupport),
           Divider(),
-          _buildLanguageExpansion(),
+          _buildDrawerSubItem('Uygulama Dili', _showAppLanguageDialog),
           _buildDrawerSubItem('Gizlilik', _showPrivacyPolicy),
         ],
       ),
     );
   }
 
-  // YENİ: Dil seçenekleri için ExpansionTile
-  Widget _buildLanguageExpansion() {
-    return ExpansionTile(
-      leading: Icon(Icons.language, size: 24, color: Color(0xFFD32F2F)),
-      title: Text('Diller'),
-      children: [
-        ListTile(
-          leading: SizedBox(width: 24), // Boşluk için
-          title: Text('Uygulama Dili'),
-          subtitle: Text('Türkçe (Varsayılan)'),
-          onTap: () => _showLanguageSelectionDialog('Uygulama Dili'),
-        ),
-        ListTile(
-          leading: SizedBox(width: 24), // Boşluk için
-          title: Text('PDF Görüntüleyici Dili'),
-          subtitle: Text('Otomatik'),
-          onTap: () => _showLanguageSelectionDialog('PDF Görüntüleyici Dili'),
-        ),
-      ],
-    );
-  }
-
-  void _showLanguageSelectionDialog(String type) {
+  void _showAppLanguageDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('$type Seçin', style: TextStyle(color: Color(0xFFD32F2F))),
+        title: Text('Uygulama Dili Seçin', style: TextStyle(color: Color(0xFFD32F2F))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (type == 'Uygulama Dili') ...[
-              _buildLanguageOption('Türkçe (Varsayılan)', true),
-              _buildLanguageOption('İngilizce', false),
-              _buildLanguageOption('Almanca', false),
-              _buildLanguageOption('Fransızca', false),
-            ] else if (type == 'PDF Görüntüleyici Dili') ...[
-              _buildLanguageOption('Otomatik (Sistem Dili)', true),
-              _buildLanguageOption('Türkçe', false),
-              _buildLanguageOption('İngilizce', false),
-              _buildLanguageOption('Almanca', false),
-            ],
+            _buildLanguageOption('Türkçe', true),
+            _buildLanguageOption('İngilizce', false),
+            _buildLanguageOption('Almanca', false),
+            _buildLanguageOption('Fransızca', false),
+            _buildLanguageOption('Arapça', false),
+            _buildLanguageOption('İspanyolca', false),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('İptal', style: TextStyle(color: Color(0xFFD32F2F))),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('$type ayarı kaydedildi')),
-              );
-            },
-            child: Text('Kaydet', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -1553,7 +1516,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       onTap: () {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$language seçildi')),
+          SnackBar(content: Text('$language seçildi - Yakında eklenecek! 🚀')),
         );
       },
     );
