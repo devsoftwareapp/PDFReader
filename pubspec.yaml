@@ -12,8 +12,7 @@ dependencies:
     sdk: flutter
   file_picker: ^8.1.0
   flutter_inappwebview: ^6.1.5
-  path_provider: ^2.1.5
-  intl: ^0.19.0
+  path_provider: ^2.1.5  # GÜNCELLENDİ
   path: ^1.8.3
   permission_handler: ^11.0.1
   device_info_plus: ^11.3.0
@@ -26,19 +25,11 @@ dependencies:
   connectivity_plus: ^5.0.0
   cached_network_image: ^3.3.0
   sqflite: ^2.3.0
-  shared_preferences: ^2.2.2
-  provider: ^6.1.1
-  flutter_localizations:
-    sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.2
-  flutter_gen_runner: ^5.4.0
-  build_runner: ^2.4.7
-  flutter_launcher_icons: ^0.13.1  # ← BU EKLENDİ
-
 
 flutter_icons:
   image_path: "icon/icon.png"
@@ -46,22 +37,13 @@ flutter_icons:
   adaptive_icon_background: "#ffffff"
   adaptive_icon_foreground: "icon/icon.png"
 
-
-# --- BURASI ÖNEMLİ: flutter_gen BURAYA ALINDI ---
-flutter_gen:
-  output: lib/gen/
-
 flutter:
   uses-material-design: true
-
-  # Flutter'ın kendi sınıf üretme sistemi
-  generate: true
-
+  
   assets:
-    # --- L10N DOSYALARI ---
-    - assets/l10n/
 
-    # --- TOOLS HTML DOSYALARI ---
+    
+    # --- YENİ TOOLS HTML DOSYALARI ---
     - assets/web/birlestirme.html
     - assets/web/imza.html
     - assets/web/res_pdf.html
@@ -71,25 +53,22 @@ flutter:
     - assets/web/pdf_res.html
     - assets/web/pdf_metin_ekle.html
     - assets/web/organize.html
-    - assets/web/sikistirma.html
+    - assets/web/sikistirma.html 
 
-    # --- PDFjs DOSYALARI ---
+   #PDFjs zorunlu dosyalari
+  
     - assets/build/pdf.mjs
     - assets/build/pdf.worker.mjs
     - assets/web/viewer.css
     - assets/web/viewer.html
     - assets/web/viewer.mjs
     - assets/web/images/
-
-    # --- ICON DOSYALARI ---
     - assets/icon/
     - assets/icon/logo.png
     - assets/icon/drive.png
     - assets/icon/onedrive.png
     - assets/icon/dropbox.png
     - assets/icon/gmail.png
-
-    # --- LOCALE DOSYALARI ---
     - assets/web/locale/locale.json
     - assets/web/locale/af/
     - assets/web/locale/an/
