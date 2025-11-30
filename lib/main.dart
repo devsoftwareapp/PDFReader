@@ -1476,10 +1476,86 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           _buildDrawerItem(Icons.info, 'PDF Reader Hakkında', _showAboutDialog),
           _buildDrawerItem(Icons.help, 'Yardım ve Destek', _showHelpSupport),
           Divider(),
-          _buildDrawerSubItem('Diller', _showLanguageSettings),
+          _buildLanguageExpansion(),
           _buildDrawerSubItem('Gizlilik', _showPrivacyPolicy),
         ],
       ),
+    );
+  }
+
+  // YENİ: Dil seçenekleri için ExpansionTile
+  Widget _buildLanguageExpansion() {
+    return ExpansionTile(
+      leading: Icon(Icons.language, size: 24, color: Color(0xFFD32F2F)),
+      title: Text('Diller'),
+      children: [
+        ListTile(
+          leading: SizedBox(width: 24), // Boşluk için
+          title: Text('Uygulama Dili'),
+          subtitle: Text('Türkçe (Varsayılan)'),
+          onTap: () => _showLanguageSelectionDialog('Uygulama Dili'),
+        ),
+        ListTile(
+          leading: SizedBox(width: 24), // Boşluk için
+          title: Text('PDF Görüntüleyici Dili'),
+          subtitle: Text('Otomatik'),
+          onTap: () => _showLanguageSelectionDialog('PDF Görüntüleyici Dili'),
+        ),
+      ],
+    );
+  }
+
+  void _showLanguageSelectionDialog(String type) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('$type Seçin', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (type == 'Uygulama Dili') ...[
+              _buildLanguageOption('Türkçe (Varsayılan)', true),
+              _buildLanguageOption('İngilizce', false),
+              _buildLanguageOption('Almanca', false),
+              _buildLanguageOption('Fransızca', false),
+            ] else if (type == 'PDF Görüntüleyici Dili') ...[
+              _buildLanguageOption('Otomatik (Sistem Dili)', true),
+              _buildLanguageOption('Türkçe', false),
+              _buildLanguageOption('İngilizce', false),
+              _buildLanguageOption('Almanca', false),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('İptal', style: TextStyle(color: Color(0xFFD32F2F))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('$type ayarı kaydedildi')),
+              );
+            },
+            child: Text('Kaydet', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(String language, bool isSelected) {
+    return ListTile(
+      title: Text(language),
+      trailing: isSelected ? Icon(Icons.check, color: Color(0xFFD32F2F)) : null,
+      onTap: () {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$language seçildi')),
+        );
+      },
     );
   }
 
@@ -1546,40 +1622,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               );
             },
             child: Text('Gönder', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLanguageSettings() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Dil Ayarları', style: TextStyle(color: Color(0xFFD32F2F))),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: Icon(Icons.language, color: Color(0xFFD32F2F)),
-              title: Text('Uygulama Dili'),
-              subtitle: Text('Yakında eklenecek'),
-              onTap: () => _showComingSoon('Uygulama Dili'),
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(Icons.picture_as_pdf, color: Color(0xFFD32F2F)),
-              title: Text('PDF Görüntüleyici Dili'),
-              subtitle: Text('Yakında eklenecek'),
-              onTap: () => _showComingSoon('PDF Görüntüleyici Dili'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
