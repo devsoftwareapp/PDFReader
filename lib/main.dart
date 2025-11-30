@@ -101,7 +101,7 @@ class PdfManagerApp extends StatelessWidget {
       
       // Localization ayarları
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
+      supportedLocales: _getSupportedLocales(),
       
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -186,6 +186,29 @@ class PdfManagerApp extends StatelessWidget {
       home: HomePage(initialIntent: initialIntent),
     );
   }
+
+  // Desteklenen dilleri belirle
+  List<Locale> _getSupportedLocales() {
+    return [
+      const Locale('en', 'US'),
+      const Locale('tr', 'TR'),
+      const Locale('es', 'ES'),
+      const Locale('fr', 'FR'),
+      const Locale('de', 'DE'),
+      const Locale('zh', 'CN'),
+      const Locale('hi', 'IN'),
+      const Locale('ar', 'AR'),
+      const Locale('ru', 'RU'),
+      const Locale('pt', 'BR'),
+      const Locale('id', 'ID'),
+      const Locale('ur', 'PK'),
+      const Locale('ja', 'JP'),
+      const Locale('sw', 'TZ'),
+      const Locale('bn', 'BD'),
+      const Locale('fi', 'FI'),
+      const Locale('cs', 'CS'),
+    ];
+  }
 }
 
 class HomePage extends StatefulWidget {
@@ -219,6 +242,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final ThemeManager _themeManager = ThemeManager();
   final LanguageProvider _languageProvider = LanguageProvider();
 
+  // Dil verileri - VERİLEN DİLLER EKLENDİ
+  final List<Map<String, String>> _languages = [
+    {'code': 'en_US', 'name': 'English', 'native': 'English'},
+    {'code': 'tr_TR', 'name': 'Turkish', 'native': 'Türkçe'},
+    {'code': 'es_ES', 'name': 'Spanish', 'native': 'Español'},
+    {'code': 'fr_FR', 'name': 'French', 'native': 'Français'},
+    {'code': 'de_DE', 'name': 'German', 'native': 'Deutsch'},
+    {'code': 'zh_CN', 'name': 'Chinese', 'native': '中文'},
+    {'code': 'hi_IN', 'name': 'Hindi', 'native': 'हिन्दी'},
+    {'code': 'ar_AR', 'name': 'Arabic', 'native': 'العربية'},
+    {'code': 'ru_RU', 'name': 'Russian', 'native': 'Русский'},
+    {'code': 'pt_BR', 'name': 'Portuguese', 'native': 'Português'},
+    {'code': 'id_ID', 'name': 'Indonesian', 'native': 'Bahasa Indonesia'},
+    {'code': 'ur_PK', 'name': 'Urdu', 'native': 'اردو'},
+    {'code': 'ja_JP', 'name': 'Japanese', 'native': '日本語'},
+    {'code': 'sw_TZ', 'name': 'Swahili', 'native': 'Kiswahili'},
+    {'code': 'bn_BD', 'name': 'Bengali', 'native': 'বাংলা'},
+    {'code': 'fi_FI', 'name': 'Kurmanci', 'native': 'Kurdî - Zarava Kurmancî'},
+    {'code': 'cs_CS', 'name': 'Zazakî', 'native': 'Kurdî - Zarava Zazakî'},
+  ];
+
+  // Dil arama için
+  final TextEditingController _languageSearchController = TextEditingController();
+  String _languageSearchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -239,6 +287,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleInitialIntent();
+    });
+
+    _languageSearchController.addListener(_onLanguageSearchChanged);
+  }
+
+  void _onLanguageSearchChanged() {
+    setState(() {
+      _languageSearchQuery = _languageSearchController.text.toLowerCase();
     });
   }
 
@@ -1230,6 +1286,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildDrawer() {
+    final filteredLanguages = _languageSearchQuery.isEmpty
+        ? _languages
+        : _languages.where((lang) =>
+            lang['name']!.toLowerCase().contains(_languageSearchQuery) ||
+            lang['native']!.toLowerCase().contains(_languageSearchQuery) ||
+            lang['code']!.toLowerCase().contains(_languageSearchQuery))
+        .toList();
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -1259,14 +1323,114 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
+          
+          // DİL SEÇİMİ BÖLÜMÜ
+          ExpansionTile(
+            leading: Icon(Icons.language, color: Color(0xFFD32F2F)),
+            title: Text(AppLocalizations.of(context).languages),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                child: TextField(
+                  controller: _languageSearchController,
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context).searchLanguage,
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                    isDense: true,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 300,
+                child: filteredLanguages.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                            SizedBox(height: 16),
+                            Text(
+                              AppLocalizations.of(context).noLanguageFound,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filteredLanguages.length,
+                        itemBuilder: (context, index) {
+                          final language = filteredLanguages[index];
+                          final code = language['code']!;
+                          final isCurrent = _languageProvider.currentLanguage?.code == code;
+                          
+                          return ListTile(
+                            leading: Icon(Icons.flag, color: Color(0xFFD32F2F)),
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(language['native']!, style: TextStyle(fontWeight: FontWeight.bold)),
+                                Text(language['name']!, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                              ],
+                            ),
+                            trailing: isCurrent ? Icon(Icons.check, color: Colors.green) : null,
+                            onTap: () {
+                              final selectedLocale = _getLocaleFromCode(code);
+                              _languageProvider.setLanguage(Language(
+                                code: code,
+                                name: language['name']!,
+                                nativeName: language['native']!,
+                                flag: '',
+                              ));
+                              _languageSearchController.clear();
+                              _languageSearchQuery = '';
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+
           _buildDrawerItem(Icons.info, AppLocalizations.of(context).about, _showAboutDialog),
           _buildDrawerItem(Icons.help, AppLocalizations.of(context).helpAndSupport, _showHelpSupport),
           Divider(),
-          _buildDrawerSubItem(AppLocalizations.of(context).languages, _showLanguageSettings),
           _buildDrawerSubItem(AppLocalizations.of(context).privacy, _showPrivacyPolicy),
         ],
       ),
     );
+  }
+
+  Locale _getLocaleFromCode(String code) {
+    if (code == 'en_US') return const Locale('en', 'US');
+    if (code == 'tr_TR') return const Locale('tr', 'TR');
+    if (code == 'es_ES') return const Locale('es', 'ES');
+    if (code == 'fr_FR') return const Locale('fr', 'FR');
+    if (code == 'de_DE') return const Locale('de', 'DE');
+    if (code == 'zh_CN') return const Locale('zh', 'CN');
+    if (code == 'hi_IN') return const Locale('hi', 'IN');
+    if (code == 'ar_AR') return const Locale('ar', 'AR');
+    if (code == 'ru_RU') return const Locale('ru', 'RU');
+    if (code == 'pt_BR') return const Locale('pt', 'BR');
+    if (code == 'id_ID') return const Locale('id', 'ID');
+    if (code == 'ur_PK') return const Locale('ur', 'PK');
+    if (code == 'ja_JP') return const Locale('ja', 'JP');
+    if (code == 'sw_TZ') return const Locale('sw', 'TZ');
+    if (code == 'bn_BD') return const Locale('bn', 'BD');
+    if (code == 'fi_FI') return const Locale('fi', 'FI');
+    if (code == 'cs_CS') return const Locale('cs', 'CS');
+    
+    if (code.contains('_')) {
+      final parts = code.split('_');
+      return Locale(parts[0], parts.length > 1 ? parts[1] : null);
+    }
+    return Locale(code);
   }
 
   void _showHelpSupport() {
@@ -1538,6 +1702,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _database?.close();
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _languageSearchController.dispose();
     super.dispose();
   }
 }
