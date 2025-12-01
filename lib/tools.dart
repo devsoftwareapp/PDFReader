@@ -2,6 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+// LanguageManager tipi için abstract sınıf
+abstract class BaseLanguageManager {
+  String get currentLanguage;
+  String get webViewLangCode;
+}
+
 // Tools için dil desteği
 class ToolsLocalizations {
   static final Map<String, Map<String, String>> _localizedValues = {
@@ -245,30 +251,35 @@ class ToolsLocalizations {
     },
   };
 
-  static String of(String key, BuildContext context, String language) {
-    return _localizedValues[language]?[key] ?? _localizedValues['en']?[key] ?? key;
+  static String of(BuildContext context, String key, BaseLanguageManager languageManager) {
+    final languageCode = languageManager.currentLanguage;
+    return _localizedValues[languageCode]?[key] ?? _localizedValues['en']?[key] ?? key;
+  }
+
+  static String translate(String languageCode, String key) {
+    return _localizedValues[languageCode]?[key] ?? _localizedValues['en']?[key] ?? key;
   }
 }
 
 class ToolsScreen extends StatelessWidget {
   final VoidCallback onPickFile;
-  final String currentLanguage;
+  final BaseLanguageManager languageManager;
 
   const ToolsScreen({
     super.key, 
     required this.onPickFile,
-    required this.currentLanguage,
+    required this.languageManager,
   });
 
   void _openToolWebView(BuildContext context, String toolName, String htmlFile, String toolKey) {
-    final localizedToolName = ToolsLocalizations.of(toolKey, context, currentLanguage);
+    final localizedToolName = ToolsLocalizations.of(context, toolKey, languageManager);
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ToolWebViewScreen(
           toolName: localizedToolName,
           htmlFile: htmlFile,
-          currentLanguage: currentLanguage,
+          languageManager: languageManager,
         ),
       ),
     );
@@ -363,7 +374,7 @@ class ToolsScreen extends StatelessWidget {
       itemCount: tools.length,
       itemBuilder: (context, index) {
         final tool = tools[index];
-        final toolName = ToolsLocalizations.of(tool['name'] as String, context, currentLanguage);
+        final toolName = ToolsLocalizations.of(context, tool['name'] as String, languageManager);
         
         return Card(
           elevation: 2,
@@ -414,13 +425,13 @@ class ToolsScreen extends StatelessWidget {
 class ToolWebViewScreen extends StatefulWidget {
   final String toolName;
   final String htmlFile;
-  final String currentLanguage;
+  final BaseLanguageManager languageManager;
 
   const ToolWebViewScreen({
     super.key,
     required this.toolName,
     required this.htmlFile,
-    required this.currentLanguage,
+    required this.languageManager,
   });
 
   @override
@@ -433,18 +444,13 @@ class _ToolWebViewScreenState extends State<ToolWebViewScreen> {
 
   String _getWebViewUrl() {
     // WebView dil parametresini ekle
-    String langParam = widget.currentLanguage;
-    
-    // WebView'daki dil kodları ile eşleştirme
-    if (widget.currentLanguage == 'zh') langParam = 'zh-cn';
-    if (widget.currentLanguage == 'pt') langParam = 'pt-br';
-    
+    final langParam = widget.languageManager.webViewLangCode;
     return 'file:///android_asset/flutter_assets/assets/web/${widget.htmlFile}?lang=$langParam';
   }
 
   @override
   Widget build(BuildContext context) {
-    final loadingText = ToolsLocalizations.of('tool_loading', context, widget.currentLanguage);
+    final loadingText = ToolsLocalizations.translate(widget.languageManager.currentLanguage, 'tool_loading');
     
     return Scaffold(
       appBar: AppBar(
@@ -468,15 +474,6 @@ class _ToolWebViewScreenState extends State<ToolWebViewScreen> {
             onWebViewCreated: (controller) {
               _controller = controller;
               print('🛠️ ${widget.toolName} WebView created: ${_getWebViewUrl()}');
-              
-              // WebView dil değişikliklerini dinle (isteğe bağlı)
-              // controller.addJavaScriptHandler(
-              //   handlerName: 'languageChanged',
-              //   callback: (args) {
-              //     print('Language changed from WebView: $args');
-              //     return {};
-              //   },
-              // );
             },
             onLoadStart: (controller, url) {
               print('🛠️ Loading started: $url');
