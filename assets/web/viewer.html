@@ -24,9 +24,11 @@
 
 
     <!--BURADA BASLAR-->
-
 <script>
 document.addEventListener("webviewerloaded", () => {
+  // worker tanımı
+  window.pdfjsLib = window.pdfjsLib || {};
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/build/pdf.worker.mjs";
 
   const params = new URLSearchParams(window.location.search);
   const base64 = params.get("base64");
@@ -38,24 +40,18 @@ document.addEventListener("webviewerloaded", () => {
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) bytes[i] = raw.charCodeAt(i);
 
-  // Uint8Array → Blob → Blob URL
+  // Blob
   const blob = new Blob([bytes], { type: "application/pdf" });
   const blobUrl = URL.createObjectURL(blob);
 
-  // viewer hazır mı?
   const wait = setInterval(() => {
     if (window.PDFViewerApplication?.initialized) {
       clearInterval(wait);
-
-      // 🔥 PDF.js v5.x’in TEK doğru açma yöntemi
       PDFViewerApplication.open({ url: blobUrl });
-
     }
   }, 50);
-
 });
 </script>
-
     <!--Burada Biter-->
 
 
