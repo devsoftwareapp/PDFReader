@@ -2,13 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-// LanguageManager tipi için abstract sınıf
-abstract class BaseLanguageManager {
-  String get currentLanguage;
-  String get webViewLangCode;
-}
-
-// Tools için dil desteği
+// Tools için dil desteği - BASİT
 class ToolsLocalizations {
   static final Map<String, Map<String, String>> _localizedValues = {
     'ar': {
@@ -251,19 +245,15 @@ class ToolsLocalizations {
     },
   };
 
-  static String of(BuildContext context, String key, BaseLanguageManager languageManager) {
-    final languageCode = languageManager.currentLanguage;
-    return _localizedValues[languageCode]?[key] ?? _localizedValues['en']?[key] ?? key;
-  }
-
   static String translate(String languageCode, String key) {
-    return _localizedValues[languageCode]?[key] ?? _localizedValues['en']?[key] ?? key;
+    final lang = languageCode.toLowerCase();
+    return _localizedValues[lang]?[key] ?? _localizedValues['en']?[key] ?? key;
   }
 }
 
 class ToolsScreen extends StatelessWidget {
   final VoidCallback onPickFile;
-  final BaseLanguageManager languageManager;
+  final dynamic languageManager;
 
   const ToolsScreen({
     super.key, 
@@ -271,15 +261,13 @@ class ToolsScreen extends StatelessWidget {
     required this.languageManager,
   });
 
-  void _openToolWebView(BuildContext context, String toolName, String htmlFile, String toolKey) {
-    final localizedToolName = ToolsLocalizations.of(context, toolKey, languageManager);
+  void _openToolWebView(BuildContext context, String toolName, String htmlFile) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ToolWebViewScreen(
-          toolName: localizedToolName,
+          toolName: toolName,
           htmlFile: htmlFile,
-          languageManager: languageManager,
         ),
       ),
     );
@@ -287,79 +275,76 @@ class ToolsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // languageManager'dan dil kodunu al
+    String currentLanguage = 'en';
+    try {
+      if (languageManager != null && languageManager.currentLanguage != null) {
+        currentLanguage = languageManager.currentLanguage.toString().toLowerCase();
+      }
+    } catch (e) {
+      print('Dil yöneticisi hatası: $e');
+    }
+
     final tools = [
-      // SOL TARAF - PDF İşlemleri
       {
         'icon': Icons.merge,
-        'name': 'pdf_merge',
+        'key': 'pdf_merge',
         'color': const Color(0xFFFFEBEE),
         'htmlFile': 'birlestirme.html',
-        'key': 'pdf_merge',
       },
       {
         'icon': Icons.edit,
-        'name': 'pdf_sign',
+        'key': 'pdf_sign',
         'color': const Color(0xFFE8F5E8),
         'htmlFile': 'imza.html',
-        'key': 'pdf_sign',
       },
       {
         'icon': Icons.compress,
-        'name': 'pdf_compress',
+        'key': 'pdf_compress',
         'color': const Color(0xFFE3F2FD),
         'htmlFile': 'sikistirma.html',
-        'key': 'pdf_compress',
       },
       {
         'icon': Icons.photo_library,
-        'name': 'image_to_pdf',
+        'key': 'image_to_pdf',
         'color': const Color(0xFFFFF3E0),
         'htmlFile': 'res_pdf.html',
-        'key': 'image_to_pdf',
       },
-
-      // SAĞ TARAF - Diğer Araçlar
       {
         'icon': Icons.volume_up,
-        'name': 'text_to_speech',
+        'key': 'text_to_speech',
         'color': const Color(0xFFF3E5F5),
         'htmlFile': 'sesli_okuma.html',
-        'key': 'text_to_speech',
       },
       {
         'icon': Icons.text_fields,
-        'name': 'ocr_extract',
+        'key': 'ocr_extract',
         'color': const Color(0xFFE0F2F1),
         'htmlFile': 'ocr.html',
-        'key': 'ocr_extract',
       },
       {
         'icon': Icons.picture_as_pdf,
-        'name': 'pdf_to_image',
+        'key': 'pdf_to_image',
         'color': const Color(0xFFFCE4EC),
         'htmlFile': 'pdf_res.html',
-        'key': 'pdf_to_image',
       },
       {
         'icon': Icons.text_snippet,
-        'name': 'add_text',
+        'key': 'add_text',
         'color': const Color(0xFFE8EAF6),
         'htmlFile': 'pdf_metin_ekle.html',
-        'key': 'add_text',
       },
       {
         'icon': Icons.layers,
-        'name': 'organize_pages',
+        'key': 'organize_pages',
         'color': const Color(0xFFE8F5E8),
         'htmlFile': 'organize.html',
-        'key': 'organize_pages',
       },
       {
         'icon': Icons.image,
-        'name': 'add_image',
+        'key': 'add_image',
         'color': const Color(0xFFE3F2FD),
         'htmlFile': 'pdf_resim_ekle.html',
-        'key': 'add_image',
       },
     ];
 
@@ -374,7 +359,7 @@ class ToolsScreen extends StatelessWidget {
       itemCount: tools.length,
       itemBuilder: (context, index) {
         final tool = tools[index];
-        final toolName = ToolsLocalizations.of(context, tool['name'] as String, languageManager);
+        final toolName = ToolsLocalizations.translate(currentLanguage, tool['key'] as String);
         
         return Card(
           elevation: 2,
@@ -385,7 +370,6 @@ class ToolsScreen extends StatelessWidget {
               context, 
               toolName, 
               tool['htmlFile'] as String,
-              tool['key'] as String,
             ),
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -425,13 +409,11 @@ class ToolsScreen extends StatelessWidget {
 class ToolWebViewScreen extends StatefulWidget {
   final String toolName;
   final String htmlFile;
-  final BaseLanguageManager languageManager;
 
   const ToolWebViewScreen({
     super.key,
     required this.toolName,
     required this.htmlFile,
-    required this.languageManager,
   });
 
   @override
@@ -443,15 +425,12 @@ class _ToolWebViewScreenState extends State<ToolWebViewScreen> {
   bool _isLoading = true;
 
   String _getWebViewUrl() {
-    // WebView dil parametresini ekle
-    final langParam = widget.languageManager.webViewLangCode;
-    return 'file:///android_asset/flutter_assets/assets/web/${widget.htmlFile}?lang=$langParam';
+    // HTML dosyalarına dil parametresi EKLEMİYORUZ
+    return 'file:///android_asset/flutter_assets/assets/web/${widget.htmlFile}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final loadingText = ToolsLocalizations.translate(widget.languageManager.currentLanguage, 'tool_loading');
-    
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.toolName),
@@ -473,37 +452,33 @@ class _ToolWebViewScreenState extends State<ToolWebViewScreen> {
             ),
             onWebViewCreated: (controller) {
               _controller = controller;
-              print('🛠️ ${widget.toolName} WebView created: ${_getWebViewUrl()}');
             },
             onLoadStart: (controller, url) {
-              print('🛠️ Loading started: $url');
               setState(() {
                 _isLoading = true;
               });
             },
             onLoadStop: (controller, url) {
-              print('✅ ${widget.toolName} loaded: $url');
               setState(() {
                 _isLoading = false;
               });
             },
             onLoadError: (controller, url, code, message) {
-              print('❌ ${widget.toolName} load error: $message (code: $code)');
               setState(() {
                 _isLoading = false;
               });
             },
           ),
           if (_isLoading)
-            Center(
+            const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(color: Color(0xFFD32F2F)),
-                  const SizedBox(height: 20),
+                  CircularProgressIndicator(color: Color(0xFFD32F2F)),
+                  SizedBox(height: 20),
                   Text(
-                    loadingText,
-                    style: const TextStyle(
+                    'Araç Yükleniyor...',
+                    style: TextStyle(
                       fontSize: 16,
                       color: Color(0xFFD32F2F),
                       fontWeight: FontWeight.w500,
