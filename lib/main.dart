@@ -1,6 +1,5 @@
 // lib/main.dart
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path/path.dart' as p;
@@ -15,13 +14,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:printing/printing.dart';
 import 'package:open_file/open_file.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:pdf_reader_manager/tools.dart';
-import 'dart:ui' as ui;
 
 // Intent handling için
 final MethodChannel _intentChannel = MethodChannel('app.channel.shared/data');
 final MethodChannel _pdfViewerChannel = MethodChannel('pdf_viewer_channel');
-final MethodChannel _languageChannel = MethodChannel('app.channel/language');
 
 // Initial intent'i almak için fonksiyon
 Future<Map<String, dynamic>?> _getInitialIntent() async {
@@ -31,16 +27,6 @@ Future<Map<String, dynamic>?> _getInitialIntent() async {
   } catch (e) {
     print('Intent error: $e');
     return null;
-  }
-}
-
-// Dil ayarlarını WebView'a göndermek için
-Future<void> _updateWebViewLanguage(String langCode) async {
-  try {
-    await _languageChannel.invokeMethod('updateLanguage', {'langCode': langCode});
-    print('WebView dil güncellendi: $langCode');
-  } catch (e) {
-    print('WebView dil güncelleme hatası: $e');
   }
 }
 
@@ -70,777 +56,6 @@ class ThemeManager with ChangeNotifier {
   }
 }
 
-// Dil yönetimi
-class LanguageManager with ChangeNotifier {
-  static const String defaultLanguage = 'en';
-  String _currentLanguage = defaultLanguage;
-  
-  // Desteklenen diller - WebView ile uyumlu
-  final Map<String, String> supportedLanguages = {
-    'ar': 'العربية', // Arabic
-    'bn': 'বাংলা', // Bengali
-    'de': 'Deutsch', // German
-    'en': 'English', // English
-    'es': 'Español', // Spanish
-    'fr': 'Français', // French
-    'hi': 'हिन्दी', // Hindi
-    'id': 'Bahasa Indonesia', // Indonesian
-    'ja': '日本語', // Japanese
-    'ku': 'Kurmanci', // Kurmanci
-    'pt': 'Português', // Portuguese
-    'ru': 'Русский', // Russian
-    'sw': 'Kiswahili', // Swahili
-    'tr': 'Türkçe', // Turkish
-    'ur': 'اردو', // Urdu
-    'za': 'Zazakî', // Zazaki
-    'zh': '中文', // Chinese
-  };
-  
-  // Dil kodlarını WebView formatına dönüştür
-  String get webViewLangCode {
-    // WebView'daki dil kodları ile eşleştirme
-    if (_currentLanguage == 'zh') return 'zh-cn'; // Basitleştirilmiş Çince
-    if (_currentLanguage == 'pt') return 'pt-br'; // Brezilya Portekizcesi
-    return _currentLanguage;
-  }
-  
-  String get currentLanguage => _currentLanguage;
-  
-  Future<void> setLanguage(String langCode, {bool updateWebView = true}) async {
-    if (supportedLanguages.containsKey(langCode)) {
-      _currentLanguage = langCode;
-      
-      // WebView dilini güncelle
-      if (updateWebView) {
-        await _updateWebViewLanguage(webViewLangCode);
-      }
-      
-      notifyListeners();
-      print('Uygulama dili değiştirildi: $langCode');
-    } else {
-      print('Desteklenmeyen dil kodu: $langCode');
-    }
-  }
-  
-  Future<void> detectDeviceLanguage() async {
-    final locale = ui.window.locale;
-    String deviceLang = locale.languageCode.toLowerCase();
-    
-    // Özel eşleştirmeler
-    if (deviceLang == 'zh_hans' || deviceLang == 'zh_cn') {
-      deviceLang = 'zh';
-    } else if (deviceLang == 'zh_hant' || deviceLang == 'zh_tw') {
-      deviceLang = 'zh';
-    } else if (deviceLang == 'pt_br' || deviceLang == 'pt_pt') {
-      deviceLang = 'pt';
-    }
-    
-    // Destekleniyor mu kontrol et
-    if (supportedLanguages.containsKey(deviceLang)) {
-      await setLanguage(deviceLang);
-      print('Cihaz dili algılandı: $deviceLang');
-    } else {
-      await setLanguage(defaultLanguage);
-      print('Cihaz dili desteklenmiyor, varsayılan dil kullanılıyor: $defaultLanguage');
-    }
-  }
-  
-  // Dil koduna göre yerel adını al
-  String getLanguageName(String code) {
-    return supportedLanguages[code] ?? code.toUpperCase();
-  }
-  
-  // Tüm desteklenen dilleri listele
-  List<Map<String, String>> getLanguageList() {
-    return supportedLanguages.entries.map((entry) {
-      return {'code': entry.key, 'name': entry.value};
-    }).toList();
-  }
-}
-
-// Basitleştirilmiş dil desteği
-class AppTranslations {
-  static Map<String, String> getTranslations(String languageCode) {
-    final allTranslations = {
-      'ar': {
-        'home': 'الرئيسية',
-        'tools': 'الأدوات',
-        'files': 'الملفات',
-        'device_files': 'الملفات على الجهاز',
-        'recent': 'المستخدمة مؤخرًا',
-        'favorites': 'المفضلة',
-        'search': 'بحث',
-        'search_hint': 'البحث في ملفات PDF...',
-        'search_history': 'سجل البحث',
-        'clear': 'مسح',
-        'scan': 'مسح',
-        'pick_file': 'اختر ملف',
-        'permission_title': 'مطلوب إذن الوصول إلى الملفات',
-        'permission_message': 'مطلوب إذن للوصول إلى جميع الملفات لعرض جميع ملفات PDF. يمكنك منح الإذن من الإعدادات.',
-        'grant_permission': 'منح إذن الوصول',
-        'cancel': 'إلغاء',
-        'no_files': 'لم يتم العثور على ملفات PDF',
-        'scan_again': 'مسح مرة أخرى',
-        'no_recent': 'لا توجد ملفات مستخدمة مؤخرًا',
-        'no_favorites': 'لا توجد ملفات مفضلة',
-        'share': 'مشاركة',
-        'rename': 'إعادة تسمية',
-        'print': 'طباعة',
-        'delete': 'حذف',
-        'delete_title': 'حذف الملف',
-        'delete_message': 'هل أنت متأكد أنك تريد حذف الملف؟ لا يمكن التراجع عن هذا الإجراء.',
-        'confirm_delete': 'حذف',
-        'cloud_storage': 'التخزين السحابي',
-        'email_integration': 'تكامل البريد الإلكتروني',
-        'more_files': 'تصفح للمزيد من الملفات',
-        'about': 'حول',
-        'help': 'المساعدة والدعم',
-        'app_language': 'لغة التطبيق',
-        'privacy': 'الخصوصية',
-        'privacy_policy': 'سياسة الخصوصية',
-        'close': 'إغلاق',
-      },
-      'bn': {
-        'home': 'হোম',
-        'tools': 'টুলস',
-        'files': 'ফাইলস',
-        'device_files': 'ডিভাইসে ফাইল',
-        'recent': 'সাম্প্রতিক',
-        'favorites': 'পছন্দসমূহ',
-        'search': 'অনুসন্ধান',
-        'search_hint': 'পিডিএফ ফাইলে অনুসন্ধান...',
-        'search_history': 'অনুসন্ধানের ইতিহাস',
-        'clear': 'পরিষ্কার',
-        'scan': 'স্ক্যান',
-        'pick_file': 'ফাইল নির্বাচন',
-        'permission_title': 'ফাইল অ্যাক্সেস অনুমতি প্রয়োজন',
-        'permission_message': 'সমস্ত পিডিএফ ফাইল তালিকাভুক্ত করার জন্য ফাইল অ্যাক্সেস অনুমতি প্রয়োজন। আপনি সেটিংস থেকে অনুমতি দিতে পারেন।',
-        'grant_permission': 'ফাইল অ্যাক্সেস অনুমতি দিন',
-        'cancel': 'বাতিল',
-        'no_files': 'কোনো পিডিএফ ফাইল পাওয়া যায়নি',
-        'scan_again': 'আবার স্ক্যান করুন',
-        'no_recent': 'কোনো সাম্প্রতিক ফাইল নেই',
-        'no_favorites': 'কোনো পছন্দের ফাইল নেই',
-        'share': 'শেয়ার',
-        'rename': 'নাম পরিবর্তন',
-        'print': 'প্রিন্ট',
-        'delete': 'মুছুন',
-        'delete_title': 'ফাইল মুছুন',
-        'delete_message': 'দলীয় মুছতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।',
-        'confirm_delete': 'মুছুন',
-        'cloud_storage': 'ক্লাউড স্টোরেজ',
-        'email_integration': 'ইমেল ইন্টিগ্রেশন',
-        'more_files': 'আরও ফাইলের জন্য ব্রাউজ করুন',
-        'about': 'সম্পর্কে',
-        'help': 'সাহায্য ও সমর্থন',
-        'app_language': 'অ্যাপ ভাষা',
-        'privacy': 'গোপনীয়তা',
-        'privacy_policy': 'গোপনীয়তা নীতি',
-        'close': 'বন্ধ',
-      },
-      'de': {
-        'home': 'Startseite',
-        'tools': 'Werkzeuge',
-        'files': 'Dateien',
-        'device_files': 'Gerätedateien',
-        'recent': 'Zuletzt verwendet',
-        'favorites': 'Favoriten',
-        'search': 'Suchen',
-        'search_hint': 'PDF-Dateien durchsuchen...',
-        'search_history': 'Suchverlauf',
-        'clear': 'Löschen',
-        'scan': 'Scannen',
-        'pick_file': 'Datei auswählen',
-        'permission_title': 'Dateizugriffsberechtigung erforderlich',
-        'permission_message': 'Zum Auflisten aller PDF-Dateien ist die Dateizugriffsberechtigung erforderlich. Sie können die Berechtigung in den Einstellungen erteilen.',
-        'grant_permission': 'Dateizugriffsberechtigung erteilen',
-        'cancel': 'Abbrechen',
-        'no_files': 'Keine PDF-Dateien gefunden',
-        'scan_again': 'Erneut scannen',
-        'no_recent': 'Keine zuletzt geöffneten Dateien',
-        'no_favorites': 'Keine Favoriten',
-        'share': 'Teilen',
-        'rename': 'Umbenennen',
-        'print': 'Drucken',
-        'delete': 'Löschen',
-        'delete_title': 'Datei löschen',
-        'delete_message': 'Sind Sie sicher, dass Sie die Datei löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
-        'confirm_delete': 'Löschen',
-        'cloud_storage': 'Cloud-Speicher',
-        'email_integration': 'E-Mail-Integration',
-        'more_files': 'Für weitere Dateien durchsuchen',
-        'about': 'Über',
-        'help': 'Hilfe & Support',
-        'app_language': 'App-Sprache',
-        'privacy': 'Datenschutz',
-        'privacy_policy': 'Datenschutzerklärung',
-        'close': 'Schließen',
-      },
-      'en': {
-        'home': 'Home',
-        'tools': 'Tools',
-        'files': 'Files',
-        'device_files': 'Device Files',
-        'recent': 'Recent',
-        'favorites': 'Favorites',
-        'search': 'Search',
-        'search_hint': 'Search in PDF files...',
-        'search_history': 'Search History',
-        'clear': 'Clear',
-        'scan': 'Scan',
-        'pick_file': 'Pick File',
-        'permission_title': 'File Access Permission Required',
-        'permission_message': 'File access permission is required to list all PDF files. You can grant permission from Settings.',
-        'grant_permission': 'Grant File Access Permission',
-        'cancel': 'Cancel',
-        'no_files': 'No PDF files found',
-        'scan_again': 'Scan Again',
-        'no_recent': 'No recent files',
-        'no_favorites': 'No favorites',
-        'share': 'Share',
-        'rename': 'Rename',
-        'print': 'Print',
-        'delete': 'Delete',
-        'delete_title': 'Delete File',
-        'delete_message': 'Are you sure you want to delete the file? This action cannot be undone.',
-        'confirm_delete': 'Delete',
-        'cloud_storage': 'Cloud Storage',
-        'email_integration': 'Email Integration',
-        'more_files': 'Browse for More Files',
-        'about': 'About',
-        'help': 'Help & Support',
-        'app_language': 'App Language',
-        'privacy': 'Privacy',
-        'privacy_policy': 'Privacy Policy',
-        'close': 'Close',
-      },
-      'es': {
-        'home': 'Inicio',
-        'tools': 'Herramientas',
-        'files': 'Archivos',
-        'device_files': 'Archivos del dispositivo',
-        'recent': 'Recientes',
-        'favorites': 'Favoritos',
-        'search': 'Buscar',
-        'search_hint': 'Buscar en archivos PDF...',
-        'search_history': 'Historial de búsqueda',
-        'clear': 'Limpiar',
-        'scan': 'Escanear',
-        'pick_file': 'Seleccionar archivo',
-        'permission_title': 'Se requiere permiso de acceso a archivos',
-        'permission_message': 'Se requiere permiso de acceso a archivos para listar todos los archivos PDF. Puede otorgar permiso desde Configuración.',
-        'grant_permission': 'Otorgar permiso de acceso a archivos',
-        'cancel': 'Cancelar',
-        'no_files': 'No se encontraron archivos PDF',
-        'scan_again': 'Escanear de nuevo',
-        'no_recent': 'No hay archivos recientes',
-        'no_favorites': 'No hay favoritos',
-        'share': 'Compartir',
-        'rename': 'Renombrar',
-        'print': 'Imprimir',
-        'delete': 'Eliminar',
-        'delete_title': 'Eliminar archivo',
-        'delete_message': '¿Está seguro de que desea eliminar el archivo? Esta acción no se puede deshacer.',
-        'confirm_delete': 'Eliminar',
-        'cloud_storage': 'Almacenamiento en la nube',
-        'email_integration': 'Integración de correo electrónico',
-        'more_files': 'Buscar más archivos',
-        'about': 'Acerca de',
-        'help': 'Ayuda y soporte',
-        'app_language': 'Idioma de la aplicación',
-        'privacy': 'Privacidad',
-        'privacy_policy': 'Política de privacidad',
-        'close': 'Cerrar',
-      },
-      'fr': {
-        'home': 'Accueil',
-        'tools': 'Outils',
-        'files': 'Fichiers',
-        'device_files': 'Fichiers de l\'appareil',
-        'recent': 'Récents',
-        'favorites': 'Favoris',
-        'search': 'Rechercher',
-        'search_hint': 'Rechercher dans les fichiers PDF...',
-        'search_history': 'Historique de recherche',
-        'clear': 'Effacer',
-        'scan': 'Scanner',
-        'pick_file': 'Choisir un fichier',
-        'permission_title': 'Autorisation d\'accès aux fichiers requise',
-        'permission_message': 'L\'autorisation d\'accès aux fichiers est requise pour lister tous les fichiers PDF. Vous pouvez accorder l\'autorisation dans les Paramètres.',
-        'grant_permission': 'Accorder l\'autorisation d\'accès aux fichiers',
-        'cancel': 'Annuler',
-        'no_files': 'Aucun fichier PDF trouvé',
-        'scan_again': 'Scanner à nouveau',
-        'no_recent': 'Aucun fichier récent',
-        'no_favorites': 'Aucun favori',
-        'share': 'Partager',
-        'rename': 'Renommer',
-        'print': 'Imprimer',
-        'delete': 'Supprimer',
-        'delete_title': 'Supprimer le fichier',
-        'delete_message': 'Êtes-vous sûr de vouloir supprimer le fichier ? Cette action ne peut pas être annulée.',
-        'confirm_delete': 'Supprimer',
-        'cloud_storage': 'Stockage en nuage',
-        'email_integration': 'Intégration d\'e-mail',
-        'more_files': 'Parcourir pour plus de fichiers',
-        'about': 'À propos',
-        'help': 'Aide et support',
-        'app_language': 'Langue de l\'application',
-        'privacy': 'Confidentialité',
-        'privacy_policy': 'Politique de confidentialité',
-        'close': 'Fermer',
-      },
-      'hi': {
-        'home': 'होम',
-        'tools': 'टूल्स',
-        'files': 'फ़ाइलें',
-        'device_files': 'डिवाइस फ़ाइलें',
-        'recent': 'हाल ही में',
-        'favorites': 'पसंदीदा',
-        'search': 'खोज',
-        'search_hint': 'पीडीएफ फ़ाइलों में खोज...',
-        'search_history': 'खोज इतिहास',
-        'clear': 'साफ़ करें',
-        'scan': 'स्कैन',
-        'pick_file': 'फ़ाइल चुनें',
-        'permission_title': 'फ़ाइल पहुंच अनुमति आवश्यक',
-        'permission_message': 'सभी पीडीएफ फ़ाइलों को सूचीबद्ध करने के लिए फ़ाइल पहुंच अनुमति आवश्यक है। आप सेटिंग्स से अनुमति दे सकते हैं।',
-        'grant_permission': 'फ़ाइल पहुंच अनुमति दें',
-        'cancel': 'रद्द करें',
-        'no_files': 'कोई पीडीएफ फ़ाइल नहीं मिली',
-        'scan_again': 'फिर से स्कैन करें',
-        'no_recent': 'कोई हाल की फ़ाइल नहीं',
-        'no_favorites': 'कोई पसंदीदा नहीं',
-        'share': 'साझा करें',
-        'rename': 'नाम बदलें',
-        'print': 'प्रिंट',
-        'delete': 'हटाएं',
-        'delete_title': 'फ़ाइल हटाएं',
-        'delete_message': 'क्या आप वाकई फ़ाइल हटाना चाहते हैं? इस क्रिया को पूर्ववत नहीं किया जा सकता।',
-        'confirm_delete': 'हटाएं',
-        'cloud_storage': 'क्लाउड स्टोरेज',
-        'email_integration': 'ईमेल एकीकरण',
-        'more_files': 'अधिक फ़ाइलों के लिए ब्राउज़ करें',
-        'about': 'के बारे में',
-        'help': 'सहायता और समर्थन',
-        'app_language': 'ऐप भाषा',
-        'privacy': 'गोपनीयता',
-        'privacy_policy': 'गोपनीयता नीति',
-        'close': 'बंद करें',
-      },
-      'id': {
-        'home': 'Beranda',
-        'tools': 'Alat',
-        'files': 'File',
-        'device_files': 'File Perangkat',
-        'recent': 'Terbaru',
-        'favorites': 'Favorit',
-        'search': 'Cari',
-        'search_hint': 'Cari dalam file PDF...',
-        'search_history': 'Riwayat Pencarian',
-        'clear': 'Hapus',
-        'scan': 'Pindai',
-        'pick_file': 'Pilih File',
-        'permission_title': 'Izin Akses File Diperlukan',
-        'permission_message': 'Izin akses file diperlukan untuk mendaftar semua file PDF. Anda dapat memberikan izin dari Pengaturan.',
-        'grant_permission': 'Berikan Izin Akses File',
-        'cancel': 'Batal',
-        'no_files': 'Tidak ada file PDF yang ditemukan',
-        'scan_again': 'Pindai Lagi',
-        'no_recent': 'Tidak ada file terbaru',
-        'no_favorites': 'Tidak ada favorit',
-        'share': 'Bagikan',
-        'rename': 'Ganti Nama',
-        'print': 'Cetak',
-        'delete': 'Hapus',
-        'delete_title': 'Hapus File',
-        'delete_message': 'Apakah Anda yakin ingin menghapus file? Tindakan ini tidak dapat dibatalkan.',
-        'confirm_delete': 'Hapus',
-        'cloud_storage': 'Penyimpanan Awan',
-        'email_integration': 'Integrasi Email',
-        'more_files': 'Jelajahi untuk File Lainnya',
-        'about': 'Tentang',
-        'help': 'Bantuan & Dukungan',
-        'app_language': 'Bahasa Aplikasi',
-        'privacy': 'Privasi',
-        'privacy_policy': 'Kebijakan Privasi',
-        'close': 'Tutup',
-      },
-      'ja': {
-        'home': 'ホーム',
-        'tools': 'ツール',
-        'files': 'ファイル',
-        'device_files': 'デバイスファイル',
-        'recent': '最近',
-        'favorites': 'お気に入り',
-        'search': '検索',
-        'search_hint': 'PDFファイルを検索...',
-        'search_history': '検索履歴',
-        'clear': 'クリア',
-        'scan': 'スキャン',
-        'pick_file': 'ファイルを選択',
-        'permission_title': 'ファイルアクセス許可が必要です',
-        'permission_message': 'すべてのPDFファイルをリストするには、ファイルアクセス許可が必要です。設定から許可を付与できます。',
-        'grant_permission': 'ファイルアクセス許可を付与',
-        'cancel': 'キャンセル',
-        'no_files': 'PDFファイルが見つかりません',
-        'scan_again': '再スキャン',
-        'no_recent': '最近のファイルはありません',
-        'no_favorites': 'お気に入りはありません',
-        'share': '共有',
-        'rename': '名前を変更',
-        'print': '印刷',
-        'delete': '削除',
-        'delete_title': 'ファイルを削除',
-        'delete_message': 'ファイルを削除してもよろしいですか？この操作は元に戻せません。',
-        'confirm_delete': '削除',
-        'cloud_storage': 'クラウドストレージ',
-        'email_integration': 'メール連携',
-        'more_files': 'さらにファイルを閲覧',
-        'about': 'について',
-        'help': 'ヘルプ＆サポート',
-        'app_language': 'アプリの言語',
-        'privacy': 'プライバシー',
-        'privacy_policy': 'プライバシーポリシー',
-        'close': '閉じる',
-      },
-      'ku': {
-        'home': 'Mal',
-        'tools': 'Amûr',
-        'files': 'Dosye',
-        'device_files': 'Dosyeyên Amûrê',
-        'recent': 'Nêzîk',
-        'favorites': 'Bijare',
-        'search': 'Lêgerîn',
-        'search_hint': 'Di dosyeyên PDF de lêgerîn...',
-        'search_history': 'Dîroka Lêgerînê',
-        'clear': 'Paqij bike',
-        'scan': 'Pêl dan',
-        'pick_file': 'Dosye hilbijêre',
-        'permission_title': 'Destûra Gihîştina Dosyeyê Pêwîst e',
-        'permission_message': 'Destûra gihîştina dosyeyê ji bo lîstekirina hemû dosyeyên PDF pêwîst e. Hûn dikarin ji Sazkirinan destûr bidin.',
-        'grant_permission': 'Destûra Gihîştina Dosyeyê Bidin',
-        'cancel': 'Betal bike',
-        'no_files': 'Dosyeya PDF nehate dîtin',
-        'scan_again': 'Dîsa pêl bide',
-        'no_recent': 'Dosyeyên nêzîk tune',
-        'no_favorites': 'Bijare tune',
-        'share': 'Parve bike',
-        'rename': 'Nav biguherîne',
-        'print': 'Çap bike',
-        'delete': 'Jê bibe',
-        'delete_title': 'Dosyeyê Jê Bibe',
-        'delete_message': 'Ma hûn guman dikin ku hûn dixwazin dosyeyê jê bibin? Ev çalakî nabe vegerandin.',
-        'confirm_delete': 'Jê Bibe',
-        'cloud_storage': 'Embara Ewrê',
-        'email_integration': 'Têkiliya E-nameyê',
-        'more_files': 'Ji bo Dosyeyên Zêdetir Bigerin',
-        'about': 'Derbarê',
-        'help': 'Alîkarî & Piştgirî',
-        'app_language': 'Zimanê Appê',
-        'privacy': 'Nihênî',
-        'privacy_policy': 'Sîyaseta Nihênîbûnê',
-        'close': 'Bigre',
-      },
-      'pt': {
-        'home': 'Início',
-        'tools': 'Ferramentas',
-        'files': 'Arquivos',
-        'device_files': 'Arquivos do Dispositivo',
-        'recent': 'Recentes',
-        'favorites': 'Favoritos',
-        'search': 'Pesquisar',
-        'search_hint': 'Pesquisar em arquivos PDF...',
-        'search_history': 'Histórico de Pesquisa',
-        'clear': 'Limpar',
-        'scan': 'Escanear',
-        'pick_file': 'Escolher Arquivo',
-        'permission_title': 'Permissão de Acesso a Arquivos Necessária',
-        'permission_message': 'A permissão de acesso a arquivos é necessária para listar todos os arquivos PDF. Você pode conceder permissão nas Configurações.',
-        'grant_permission': 'Conceder Permissão de Acesso a Arquivos',
-        'cancel': 'Cancelar',
-        'no_files': 'Nenhum arquivo PDF encontrado',
-        'scan_again': 'Escanear Novamente',
-        'no_recent': 'Nenhum arquivo recente',
-        'no_favorites': 'Nenhum favorito',
-        'share': 'Compartilhar',
-        'rename': 'Renomear',
-        'print': 'Imprimir',
-        'delete': 'Excluir',
-        'delete_title': 'Excluir Arquivo',
-        'delete_message': 'Tem certeza de que deseja excluir o arquivo? Esta ação não pode ser desfeita.',
-        'confirm_delete': 'Excluir',
-        'cloud_storage': 'Armazenamento em Nuvem',
-        'email_integration': 'Integração de E-mail',
-        'more_files': 'Procurar Mais Arquivos',
-        'about': 'Sobre',
-        'help': 'Ajuda e Suporte',
-        'app_language': 'Idioma do Aplicativo',
-        'privacy': 'Privacidade',
-        'privacy_policy': 'Política de Privacidade',
-        'close': 'Fechar',
-      },
-      'ru': {
-        'home': 'Главная',
-        'tools': 'Инструменты',
-        'files': 'Файлы',
-        'device_files': 'Файлы устройства',
-        'recent': 'Недавние',
-        'favorites': 'Избранное',
-        'search': 'Поиск',
-        'search_hint': 'Поиск в PDF файлах...',
-        'search_history': 'История поиска',
-        'clear': 'Очистить',
-        'scan': 'Сканировать',
-        'pick_file': 'Выбрать файл',
-        'permission_title': 'Требуется разрешение на доступ к файлам',
-        'permission_message': 'Для отображения всех PDF файлов требуется разрешение на доступ к файлам. Вы можете предоставить разрешение в Настройках.',
-        'grant_permission': 'Предоставить разрешение на доступ к файлам',
-        'cancel': 'Отмена',
-        'no_files': 'PDF файлы не найдены',
-        'scan_again': 'Сканировать снова',
-        'no_recent': 'Нет недавних файлов',
-        'no_favorites': 'Нет избранного',
-        'share': 'Поделиться',
-        'rename': 'Переименовать',
-        'print': 'Печать',
-        'delete': 'Удалить',
-        'delete_title': 'Удалить файл',
-        'delete_message': 'Вы уверены, что хотите удалить файл? Это действие нельзя отменить.',
-        'confirm_delete': 'Удалить',
-        'cloud_storage': 'Облачное хранилище',
-        'email_integration': 'Интеграция с электронной почтой',
-        'more_files': 'Просмотреть другие файлы',
-        'about': 'О программе',
-        'help': 'Помощь и поддержка',
-        'app_language': 'Язык приложения',
-        'privacy': 'Конфиденциальность',
-        'privacy_policy': 'Политика конфиденциальности',
-        'close': 'Закрыть',
-      },
-      'sw': {
-        'home': 'Nyumbani',
-        'tools': 'Zana',
-        'files': 'Faili',
-        'device_files': 'Faili za Kifaa',
-        'recent': 'Hivi Karibuni',
-        'favorites': 'Vipendwa',
-        'search': 'Tafuta',
-        'search_hint': 'Tafuta kwenye faili za PDF...',
-        'search_history': 'Historia ya Utafutaji',
-        'clear': 'Futa',
-        'scan': 'Piga chapa',
-        'pick_file': 'Chagua Faili',
-        'permission_title': 'Kibali cha Ufikiaji wa Faili Kinahitajika',
-        'permission_message': 'Kibali cha ufikiaji wa faili kinahitajika kuorodhesha faili zote za PDF. Unaweza kutoa kibali kutoka kwenye Mipangilio.',
-        'grant_permission': 'Toa Kibali cha Ufikiaji wa Faili',
-        'cancel': 'Ghairi',
-        'no_files': 'Hakuna faili za PDF zilizopatikana',
-        'scan_again': 'Piga Chapa Tena',
-        'no_recent': 'Hakuna faili za hivi karibuni',
-        'no_favorites': 'Hakuna vipendwa',
-        'share': 'Shiriki',
-        'rename': 'Badilisha Jina',
-        'print': 'Chapisha',
-        'delete': 'Futa',
-        'delete_title': 'Futa Faili',
-        'delete_message': 'Una uhakika unataka kufuta faili? Hatua hii haiwezi kutenduliwa.',
-        'confirm_delete': 'Futa',
-        'cloud_storage': 'Hifadhi ya Wingu',
-        'email_integration': 'Ujumuishaji wa Barua Pepe',
-        'more_files': 'Vinjari kwa Faili Zaidi',
-        'about': 'Kuhusu',
-        'help': 'Msaada & Usaidizi',
-        'app_language': 'Lugha ya Programu',
-        'privacy': 'Faragha',
-        'privacy_policy': 'Sera ya Faragha',
-        'close': 'Funga',
-      },
-      'tr': {
-        'home': 'Ana Sayfa',
-        'tools': 'Araçlar',
-        'files': 'Dosyalar',
-        'device_files': 'Cihazda',
-        'recent': 'Son Kullanılanlar',
-        'favorites': 'Favoriler',
-        'search': 'Ara',
-        'search_hint': 'PDF dosyalarında ara...',
-        'search_history': 'Arama Geçmişi',
-        'clear': 'Temizle',
-        'scan': 'Tara',
-        'pick_file': 'Dosya Seç',
-        'permission_title': 'Dosya Erişim İzni Gerekli',
-        'permission_message': 'Tüm PDF dosyalarını listelemek için dosya erişim izni gerekiyor. Ayarlardan izin verebilirsiniz.',
-        'grant_permission': 'Tüm Dosya Erişim İzni Ver',
-        'cancel': 'İptal',
-        'no_files': 'PDF dosyası bulunamadı',
-        'scan_again': 'Yeniden Tara',
-        'no_recent': 'Henüz son açılan dosya yok',
-        'no_favorites': 'Henüz favori dosyanız yok',
-        'share': 'Paylaş',
-        'rename': 'Yeniden Adlandır',
-        'print': 'Yazdır',
-        'delete': 'Sil',
-        'delete_title': 'Dosyayı Sil',
-        'delete_message': 'Dosyayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-        'confirm_delete': 'Sil',
-        'cloud_storage': 'Bulut Depolama',
-        'email_integration': 'E-posta Entegrasyonu',
-        'more_files': 'Daha Fazla Dosya İçin Göz Atın',
-        'about': 'Hakkında',
-        'help': 'Yardım ve Destek',
-        'app_language': 'Uygulama Dili',
-        'privacy': 'Gizlilik',
-        'privacy_policy': 'Gizlilik Politikası',
-        'close': 'Kapat',
-      },
-      'ur': {
-        'home': 'ہوم',
-        'tools': 'ٹولز',
-        'files': 'فائلیں',
-        'device_files': 'ڈیوائس فائلیں',
-        'recent': 'حالیہ',
-        'favorites': 'پسندیدہ',
-        'search': 'تلاش',
-        'search_hint': 'پی ڈی ایف فائلوں میں تلاش کریں...',
-        'search_history': 'تلاش کی تاریخ',
-        'clear': 'صاف کریں',
-        'scan': 'اسکین',
-        'pick_file': 'فائل منتخب کریں',
-        'permission_title': 'فائل تک رسائی کی اجازت درکار ہے',
-        'permission_message': 'تمام پی ڈی ایف فائلوں کی فہرست بنانے کے لیے فائل تک رسائی کی اجازت درکار ہے۔ آپ ترتیبات سے اجازت دے سکتے ہیں۔',
-        'grant_permission': 'فائل تک رسائی کی اجازت دیں',
-        'cancel': 'منسوخ',
-        'no_files': 'کوئی پی ڈی ایف فائل نہیں ملی',
-        'scan_again': 'دوبارہ اسکین کریں',
-        'no_recent': 'کوئی حالیہ فائل نہیں',
-        'no_favorites': 'کوئی پسندیدہ نہیں',
-        'share': 'اشتراک',
-        'rename': 'نام تبدیل کریں',
-        'print': 'پرنٹ',
-        'delete': 'حذف کریں',
-        'delete_title': 'فائل حذف کریں',
-        'delete_message': 'کیا آپ واقعی فائل حذف کرنا چاہتے ہیں؟ اس عمل کو واپس نہیں کیا جا سکتا۔',
-        'confirm_delete': 'حذف کریں',
-        'cloud_storage': 'کلاؤڈ اسٹوریج',
-        'email_integration': 'ای میل انضمام',
-        'more_files': 'مزید فائلوں کے لیے براؤز کریں',
-        'about': 'متعلق',
-        'help': 'مدد اور سپورٹ',
-        'app_language': 'ایپ کی زبان',
-        'privacy': 'رازداری',
-        'privacy_policy': 'رازداری کی پالیسی',
-        'close': 'بند کریں',
-      },
-      'za': {
-        'home': 'Keye',
-        'tools': 'Hacet',
-        'files': 'Dosya',
-        'device_files': 'Dosyayê Cihazî',
-        'recent': 'Nezdî',
-        'favorites': 'Hewlî',
-        'search': 'Cî',
-        'search_hint': 'Di dosyayanê PDF de cî bike...',
-        'search_history': 'Dîroka Cîkirinê',
-        'clear': 'Paqij bike',
-        'scan': 'Pêl bike',
-        'pick_file': 'Dosya weçîne',
-        'permission_title': 'Destûra Dosyayê Pêwîst e',
-        'permission_message': 'Destûra dosyayê ji bo lîstekirina hemû dosyayên PDF pêwîst e. Hûn dikarin ji Saziyan destûr bidin.',
-        'grant_permission': 'Destûra Dosyayê Bidin',
-        'cancel': 'Betal bike',
-        'no_files': 'Dosyeya PDF nehate dîtin',
-        'scan_again': 'Dîsa pêl bike',
-        'no_recent': 'Dosyeyên nezdî tune',
-        'no_favorites': 'Hewlî tune',
-        'share': 'Parve bike',
-        'rename': 'Nav biguherîne',
-        'print': 'Çap bike',
-        'delete': 'Jê bibe',
-        'delete_title': 'Dosyeyê Jê Bibe',
-        'delete_message': 'Ma hûn bawer dikin ku hûn dixwazin dosyeyê jê bibin? Ev çalakî nabe vegerandin.',
-        'confirm_delete': 'Jê Bibe',
-        'cloud_storage': 'Embara Ewrê',
-        'email_integration': 'Têkiliya E-nameyê',
-        'more_files': 'Ji bo Dosyeyên Zêdetir Bigerin',
-        'about': 'Derheq',
-        'help': 'Alîkarî & Piştgirî',
-        'app_language': 'Zimanê Appê',
-        'privacy': 'Nihênî',
-        'privacy_policy': 'Sîyaseta Nihênîbûnê',
-        'close': 'Bigre',
-      },
-      'zh': {
-        'home': '首页',
-        'tools': '工具',
-        'files': '文件',
-        'device_files': '设备文件',
-        'recent': '最近',
-        'favorites': '收藏',
-        'search': '搜索',
-        'search_hint': '在PDF文件中搜索...',
-        'search_history': '搜索历史',
-        'clear': '清除',
-        'scan': '扫描',
-        'pick_file': '选择文件',
-        'permission_title': '需要文件访问权限',
-        'permission_message': '需要文件访问权限才能列出所有PDF文件。您可以从设置中授予权限。',
-        'grant_permission': '授予文件访问权限',
-        'cancel': '取消',
-        'no_files': '未找到PDF文件',
-        'scan_again': '重新扫描',
-        'no_recent': '没有最近的文件',
-        'no_favorites': '没有收藏',
-        'share': '分享',
-        'rename': '重命名',
-        'print': '打印',
-        'delete': '删除',
-        'delete_title': '删除文件',
-        'delete_message': '您确定要删除该文件吗？此操作无法撤销。',
-        'confirm_delete': '删除',
-        'cloud_storage': '云存储',
-        'email_integration': '电子邮件集成',
-        'more_files': '浏览更多文件',
-        'about': '关于',
-        'help': '帮助与支持',
-        'app_language': '应用语言',
-        'privacy': '隐私',
-        'privacy_policy': '隐私政策',
-        'close': '关闭',
-      },
-    };
-    
-    return allTranslations[languageCode] ?? allTranslations['en']!;
-  }
-
-  static String translate(BuildContext context, String key) {
-    final languageManager = LanguageManagerProvider.of(context);
-    final languageCode = languageManager?.currentLanguage ?? 'en';
-    final translations = getTranslations(languageCode);
-    return translations[key] ?? key;
-  }
-}
-
-// LanguageManager provider
-class LanguageManagerProvider extends InheritedWidget {
-  final LanguageManager languageManager;
-
-  const LanguageManagerProvider({
-    super.key,
-    required super.child,
-    required this.languageManager,
-  });
-
-  static LanguageManager? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<LanguageManagerProvider>()?.languageManager;
-  }
-
-  @override
-  bool updateShouldNotify(LanguageManagerProvider oldWidget) {
-    return languageManager != oldWidget.languageManager;
-  }
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -866,117 +81,327 @@ Future<void> _createAppFolder() async {
   }
 }
 
-class PdfManagerApp extends StatefulWidget {
+class PdfManagerApp extends StatelessWidget {
   final Map<String, dynamic>? initialIntent;
-
-  const PdfManagerApp({super.key, this.initialIntent});
-
-  @override
-  State<PdfManagerApp> createState() => _PdfManagerAppState();
-}
-
-class _PdfManagerAppState extends State<PdfManagerApp> {
-  late LanguageManager _languageManager;
   final ThemeManager _themeManager = ThemeManager();
 
+  PdfManagerApp({super.key, this.initialIntent});
+
   @override
-  void initState() {
-    super.initState();
-    _languageManager = LanguageManager();
-    _languageManager.detectDeviceLanguage();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'PDF Reader',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+        primaryColor: Color(0xFFD32F2F),
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xFFD32F2F),
+          foregroundColor: Colors.white,
+          elevation: 2,
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFFD32F2F),
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: Color(0xFFD32F2F),
+          unselectedItemColor: Colors.grey,
+          type: BottomNavigationBarType.fixed,
+        ),
+        tabBarTheme: TabBarTheme(
+          labelColor: Color(0xFFD32F2F),
+          unselectedLabelColor: Colors.grey,
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
+          ),
+        ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.red,
+        primaryColor: Color(0xFFD32F2F),
+        scaffoldBackgroundColor: Colors.grey[900],
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.grey[800],
+          foregroundColor: Colors.white,
+          elevation: 2,
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFFD32F2F),
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.grey[800],
+          selectedItemColor: Color(0xFFD32F2F),
+          unselectedItemColor: Colors.grey[400],
+          type: BottomNavigationBarType.fixed,
+        ),
+        tabBarTheme: TabBarTheme(
+          labelColor: Color(0xFFD32F2F),
+          unselectedLabelColor: Colors.grey[400],
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
+          ),
+        ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          color: Colors.grey[800],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+        ),
+      ),
+      themeMode: _themeManager.themeMode,
+      home: HomePage(initialIntent: initialIntent),
+    );
+  }
+}
+
+class ToolsScreen extends StatelessWidget {
+  final VoidCallback onPickFile;
+
+  const ToolsScreen({
+    super.key, 
+    required this.onPickFile,
+  });
+
+  void _openToolWebView(BuildContext context, String toolName, String htmlFile) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ToolWebViewScreen(
+          toolName: toolName,
+          htmlFile: htmlFile,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return LanguageManagerProvider(
-      languageManager: _languageManager,
-      child: MaterialApp(
-        title: 'PDF Reader',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.red,
-          primaryColor: Color(0xFFD32F2F),
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: AppBarTheme(
-            backgroundColor: Color(0xFFD32F2F),
-            foregroundColor: Colors.white,
-            elevation: 2,
-            systemOverlayStyle: SystemUiOverlayStyle.light,
-            titleTextStyle: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+    final tools = [
+      // SOL TARAF - PDF İşlemleri
+      {
+        'icon': Icons.merge,
+        'name': 'PDF\nBirleştirme',
+        'color': const Color(0xFFFFEBEE),
+        'onTap': () => _openToolWebView(context, 'PDF Birleştirme', 'birlestirme.html')
+      },
+      {
+        'icon': Icons.edit,
+        'name': 'PDF\nİmzala',
+        'color': const Color(0xFFE8F5E8),
+        'onTap': () => _openToolWebView(context, 'PDF İmzala', 'imza.html')
+      },
+      {
+        'icon': Icons.compress,
+        'name': 'PDF\'yi\nSıkıştır',
+        'color': const Color(0xFFE3F2FD),
+        'onTap': () => _openToolWebView(context, 'PDF\'yi Sıkıştır', 'sikistirma.html')
+      },
+      {
+        'icon': Icons.photo_library,
+        'name': 'Resimden\nPDF\'ye',
+        'color': const Color(0xFFFFF3E0),
+        'onTap': () => _openToolWebView(context, 'Resimden PDF\'ye', 'res_pdf.html')
+      },
+
+      // SAĞ TARAF - Diğer Araçlar
+      {
+        'icon': Icons.volume_up,
+        'name': 'Sesli\nOkuma',
+        'color': const Color(0xFFF3E5F5),
+        'onTap': () => _openToolWebView(context, 'Sesli Okuma', 'sesli_okuma.html')
+      },
+      {
+        'icon': Icons.text_fields,
+        'name': 'OCR\nMetin Çıkarma',
+        'color': const Color(0xFFE0F2F1),
+        'onTap': () => _openToolWebView(context, 'OCR Metin Çıkarma', 'ocr.html')
+      },
+      {
+        'icon': Icons.picture_as_pdf,
+        'name': 'PDF\'den\nResme',
+        'color': const Color(0xFFFCE4EC),
+        'onTap': () => _openToolWebView(context, 'PDF\'den Resme', 'pdf_res.html')
+      },
+      {
+        'icon': Icons.text_snippet,
+        'name': 'PDF\'ye\nMetin Ekle',
+        'color': const Color(0xFFE8EAF6),
+        'onTap': () => _openToolWebView(context, 'PDF\'ye Metin Ekle', 'pdf_metin_ekle.html')
+      },
+      {
+        'icon': Icons.layers,
+        'name': 'PDF Sayfalarını\nOrganize Et',
+        'color': const Color(0xFFE8F5E8),
+        'onTap': () => _openToolWebView(context, 'PDF Sayfalarını Organize Et', 'organize.html')
+      },
+      {
+        'icon': Icons.image,
+        'name': 'PDF\'ye\nResim Ekle',
+        'color': const Color(0xFFE3F2FD),
+        'onTap': () => _openToolWebView(context, 'PDF\'ye Resim Ekle', 'pdf_resim_ekle.html')
+      },
+    ];
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.8,
+      ),
+      itemCount: tools.length,
+      itemBuilder: (context, index) {
+        final tool = tools[index];
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: tool['onTap'] as Function(),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: tool['color'] as Color,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(tool['icon'] as IconData, color: const Color(0xFFD32F2F), size: 30),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    tool['name'] as String,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14, 
+                      fontWeight: FontWeight.w600, 
+                      color: Color(0xFFD32F2F),
+                    ),
+                    maxLines: 2,
+                  ),
+                ],
+              ),
             ),
           ),
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
-            backgroundColor: Color(0xFFD32F2F),
-            foregroundColor: Colors.white,
-          ),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            backgroundColor: Colors.white,
-            selectedItemColor: Color(0xFFD32F2F),
-            unselectedItemColor: Colors.grey,
-            type: BottomNavigationBarType.fixed,
-          ),
-          tabBarTheme: TabBarTheme(
-            labelColor: Color(0xFFD32F2F),
-            unselectedLabelColor: Colors.grey,
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
+        );
+      },
+    );
+  }
+}
+
+class ToolWebViewScreen extends StatefulWidget {
+  final String toolName;
+  final String htmlFile;
+
+  const ToolWebViewScreen({
+    super.key,
+    required this.toolName,
+    required this.htmlFile,
+  });
+
+  @override
+  State<ToolWebViewScreen> createState() => _ToolWebViewScreenState();
+}
+
+class _ToolWebViewScreenState extends State<ToolWebViewScreen> {
+  InAppWebViewController? _controller;
+  bool _isLoading = true;
+
+  String _getWebViewUrl() {
+    return 'file:///android_asset/flutter_assets/assets/web/${widget.htmlFile}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.toolName),
+        backgroundColor: const Color(0xFFD32F2F),
+        foregroundColor: Colors.white,
+      ),
+      body: Stack(
+        children: [
+          InAppWebView(
+            initialUrlRequest: URLRequest(url: WebUri(_getWebViewUrl())),
+            initialSettings: InAppWebViewSettings(
+              javaScriptEnabled: true,
+              allowFileAccess: true,
+              allowFileAccessFromFileURLs: true,
+              allowUniversalAccessFromFileURLs: true,
+              supportZoom: true,
+              clearCache: true,
+              cacheMode: CacheMode.LOAD_DEFAULT,
             ),
+            onWebViewCreated: (controller) {
+              _controller = controller;
+              print('🛠️ ${widget.toolName} WebView created: ${_getWebViewUrl()}');
+            },
+            onLoadStart: (controller, url) {
+              print('🛠️ Loading started: $url');
+              setState(() {
+                _isLoading = true;
+              });
+            },
+            onLoadStop: (controller, url) {
+              print('✅ ${widget.toolName} loaded: $url');
+              setState(() {
+                _isLoading = false;
+              });
+            },
+            onLoadError: (controller, url, code, message) {
+              print('❌ ${widget.toolName} load error: $message (code: $code)');
+              setState(() {
+                _isLoading = false;
+              });
+            },
           ),
-          cardTheme: CardTheme(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        darkTheme: ThemeData(
-          primarySwatch: Colors.red,
-          primaryColor: Color(0xFFD32F2F),
-          scaffoldBackgroundColor: Colors.grey[900],
-          appBarTheme: AppBarTheme(
-            backgroundColor: Colors.grey[800],
-            foregroundColor: Colors.white,
-            elevation: 2,
-            systemOverlayStyle: SystemUiOverlayStyle.light,
-            titleTextStyle: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+          if (_isLoading)
+            const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Color(0xFFD32F2F)),
+                  SizedBox(height: 20),
+                  Text(
+                    'Araç Yükleniyor...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFFD32F2F),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
-            backgroundColor: Color(0xFFD32F2F),
-            foregroundColor: Colors.white,
-          ),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            backgroundColor: Colors.grey[800],
-            selectedItemColor: Color(0xFFD32F2F),
-            unselectedItemColor: Colors.grey[400],
-            type: BottomNavigationBarType.fixed,
-          ),
-          tabBarTheme: TabBarTheme(
-            labelColor: Color(0xFFD32F2F),
-            unselectedLabelColor: Colors.grey[400],
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
-            ),
-          ),
-          cardTheme: CardTheme(
-            elevation: 2,
-            color: Colors.grey[800],
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          textTheme: TextTheme(
-            bodyLarge: TextStyle(color: Colors.white),
-            bodyMedium: TextStyle(color: Colors.white),
-          ),
-        ),
-        themeMode: _themeManager.themeMode,
-        home: HomePage(
-          initialIntent: widget.initialIntent,
-          languageManager: _languageManager,
-        ),
+        ],
       ),
     );
   }
@@ -984,13 +409,8 @@ class _PdfManagerAppState extends State<PdfManagerApp> {
 
 class HomePage extends StatefulWidget {
   final Map<String, dynamic>? initialIntent;
-  final LanguageManager languageManager;
 
-  const HomePage({
-    super.key, 
-    this.initialIntent,
-    required this.languageManager,
-  });
+  const HomePage({super.key, this.initialIntent});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -1015,19 +435,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final FocusNode _searchFocusNode = FocusNode();
 
   Database? _database;
+  final ThemeManager _themeManager = ThemeManager();
 
-  // Basitleştirilmiş başlıklar - Dil desteği için AppTranslations kullanacağız
-  List<String> get _tabTitles => [
-    AppTranslations.translate(context, 'home'),
-    AppTranslations.translate(context, 'tools'),
-    AppTranslations.translate(context, 'files'),
-  ];
-  
-  List<String> get _homeTabTitles => [
-    AppTranslations.translate(context, 'device_files'),
-    AppTranslations.translate(context, 'recent'),
-    AppTranslations.translate(context, 'favorites'),
-  ];
+  final List<String> _tabTitles = ['Ana Sayfa', 'Araçlar', 'Dosyalar'];
+  final List<String> _homeTabTitles = ['Cihazda', 'Son Kullanılanlar', 'Favoriler'];
 
   @override
   void initState() {
@@ -1048,11 +459,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleInitialIntent();
-    });
-    
-    // Dil değişikliklerini dinle
-    widget.languageManager.addListener(() {
-      setState(() {});
     });
   }
 
@@ -1238,7 +644,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           builder: (_) => ViewerScreen(
             fileUri: fileToOpen,
             fileName: fileName,
-            languageManager: widget.languageManager,
           ),
         ),
       );
@@ -1308,15 +713,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          AppTranslations.translate(context, 'permission_title'),
-          style: TextStyle(color: Color(0xFFD32F2F))
-        ),
-        content: Text(AppTranslations.translate(context, 'permission_message')),
+        title: Text('Dosya Erişim İzni Gerekli', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: Text('Tüm PDF dosyalarını listelemek için dosya erişim izni gerekiyor. Ayarlardan izin verebilirsiniz.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppTranslations.translate(context, 'cancel')),
+            child: Text('Vazgeç'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
@@ -1324,7 +726,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Navigator.pop(context);
               openAppSettings();
             },
-            child: Text(AppTranslations.translate(context, 'grant_permission'), style: TextStyle(color: Colors.white)),
+            child: Text('Ayarlara Git', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -1418,7 +820,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           builder: (_) => ViewerScreen(
             file: file,
             fileName: p.basename(path),
-            languageManager: widget.languageManager,
           ),
         ),
       );
@@ -1456,12 +857,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppTranslations.translate(context, 'delete_title')),
-        content: Text('"$fileName" ${AppTranslations.translate(context, 'delete_message')}'),
+        title: Text('Dosyayı Sil'),
+        content: Text('"$fileName" dosyasını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppTranslations.translate(context, 'cancel')),
+            child: Text('İptal'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -1484,7 +885,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 );
               }
             },
-            child: Text(AppTranslations.translate(context, 'confirm_delete'), style: TextStyle(color: Colors.white)),
+            child: Text('Sil', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -1562,12 +963,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Icon(Icons.folder_open, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              AppTranslations.translate(context, 'permission_title'),
+              'Dosyalarınıza Erişim İzni Verin',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
             ),
             SizedBox(height: 8),
             Text(
-              AppTranslations.translate(context, 'permission_message'),
+              'Lütfen dosyalarınıza erişim izni verin\nAyarlar\'dan erişin.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -1579,7 +980,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
-              child: Text(AppTranslations.translate(context, 'grant_permission')),
+              child: Text('Tüm Dosya Erişim İzni Ver'),
             ),
           ],
         ),
@@ -1609,20 +1010,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           SizedBox(height: 16),
           Text(
             _isSearchMode && _searchController.text.isNotEmpty 
-                ? AppTranslations.translate(context, 'search_history')
-                : AppTranslations.translate(context, 'no_files'),
+                ? 'Arama sonucu bulunamadı'
+                : 'PDF dosyası bulunamadı',
             style: TextStyle(fontSize: 18, color: Colors.grey),
           ),
           SizedBox(height: 16),
           ElevatedButton(
             onPressed: _scanDeviceForPdfs,
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
-            child: Text(AppTranslations.translate(context, 'scan_again'), style: TextStyle(color: Colors.white)),
+            child: Text('Yeniden Tara', style: TextStyle(color: Colors.white)),
           ),
           SizedBox(height: 8),
           TextButton(
             onPressed: _pickPdfFile,
-            child: Text(AppTranslations.translate(context, 'pick_file'), style: TextStyle(color: Color(0xFFD32F2F))),
+            child: Text('Dosya Seç', style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
@@ -1655,16 +1056,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  AppTranslations.translate(context, 'search_history'),
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))
-                ),
+                Text('Arama Geçmişi', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
                 TextButton(
                   onPressed: _clearSearchHistory,
-                  child: Text(
-                    AppTranslations.translate(context, 'clear'),
-                    style: TextStyle(color: Colors.grey)
-                  ),
+                  child: Text('Temizle', style: TextStyle(color: Colors.grey)),
                 ),
               ],
             ),
@@ -1748,10 +1143,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             PopupMenuButton<String>(
               onSelected: (value) => _handleFileAction(value, filePath),
               itemBuilder: (BuildContext context) => [
-                PopupMenuItem(value: 'share', child: Text(AppTranslations.translate(context, 'share'))),
-                PopupMenuItem(value: 'rename', child: Text(AppTranslations.translate(context, 'rename'))),
-                PopupMenuItem(value: 'print', child: Text(AppTranslations.translate(context, 'print'))),
-                PopupMenuItem(value: 'delete', child: Text(AppTranslations.translate(context, 'delete'), style: TextStyle(color: Colors.red))),
+                PopupMenuItem(value: 'share', child: Text('Paylaş')),
+                PopupMenuItem(value: 'rename', child: Text('Yeniden Adlandır')),
+                PopupMenuItem(value: 'print', child: Text('Yazdır')),
+                PopupMenuItem(value: 'delete', child: Text('Sil', style: TextStyle(color: Colors.red))),
               ],
             ),
           ],
@@ -1784,7 +1179,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppTranslations.translate(context, 'rename')),
+        title: Text('Dosyayı Yeniden Adlandır'),
         content: TextField(
           controller: renameController,
           decoration: InputDecoration(
@@ -1795,7 +1190,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppTranslations.translate(context, 'cancel')),
+            child: Text('İptal'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
@@ -1837,7 +1232,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Icon(Icons.history, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              AppTranslations.translate(context, 'no_recent'),
+              'Henüz son açılan dosya yok',
               style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             SizedBox(height: 8),
@@ -1865,7 +1260,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Icon(Icons.star, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              AppTranslations.translate(context, 'no_favorites'),
+              'Henüz favori dosyanız yok',
               style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             SizedBox(height: 8),
@@ -1898,17 +1293,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       children: [
         Padding(
           padding: EdgeInsets.all(16),
-          child: Text(
-            AppTranslations.translate(context, 'files'),
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))
-          ),
+          child: Text('Dosyalar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD32F2F))),
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Text(
-            AppTranslations.translate(context, 'cloud_storage'),
-            style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)
-          ),
+          child: Text('Bulut Depolama', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
         ),
         _buildCloudItem('Google Drive', 'assets/icon/drive.png', false, () => _launchCloudService('Google Drive')),
         _buildCloudItem('OneDrive', 'assets/icon/onedrive.png', false, () => _launchCloudService('OneDrive')),
@@ -1916,21 +1305,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         
         Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: Text(
-            AppTranslations.translate(context, 'email_integration'),
-            style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)
-          ),
+          child: Text('E-posta Entegrasyonu', style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
         ),
         _buildGmailItem(),
         
         Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: _buildCloudItem(
-            AppTranslations.translate(context, 'more_files'),
-            Icons.folder_open,
-            true,
-            _pickPdfFile
-          ),
+          child: _buildCloudItem('Daha Fazla Dosya İçin Göz Atın', Icons.folder_open, true, _pickPdfFile),
         ),
       ],
     );
@@ -1996,9 +1377,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             right: 0,
             child: Column(
               children: [
-                _buildSubFabItem(AppTranslations.translate(context, 'pick_file'), Icons.attach_file, _pickPdfFile),
+                _buildSubFabItem('Dosya Seç', Icons.attach_file, _pickPdfFile),
                 SizedBox(height: 12),
-                _buildSubFabItem(AppTranslations.translate(context, 'scan'), Icons.document_scanner, () => _showComingSoon('Tarama')),
+                _buildSubFabItem('Tara', Icons.document_scanner, () => _showComingSoon('Tarama')),
                 SizedBox(height: 12),
                 _buildSubFabItem('Görsel', Icons.image, () => _showComingSoon('Görselden PDF')),
               ],
@@ -2092,65 +1473,52 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          _buildDrawerItem(Icons.info, AppTranslations.translate(context, 'about'), _showAboutDialog),
-          _buildDrawerItem(Icons.help, AppTranslations.translate(context, 'help'), _showHelpSupport),
+          _buildDrawerItem(Icons.info, 'PDF Reader Hakkında', _showAboutDialog),
+          _buildDrawerItem(Icons.help, 'Yardım ve Destek', _showHelpSupport),
           Divider(),
-          _buildDrawerSubItem(AppTranslations.translate(context, 'app_language'), _showAppLanguageDialog),
-          _buildDrawerSubItem(AppTranslations.translate(context, 'privacy'), _showPrivacyPolicy),
+          _buildDrawerSubItem('Uygulama Dili', _showAppLanguageDialog),
+          _buildDrawerSubItem('Gizlilik', _showPrivacyPolicy),
         ],
       ),
     );
   }
 
   void _showAppLanguageDialog() {
-    final languageList = widget.languageManager.getLanguageList();
-    final currentLang = widget.languageManager.currentLanguage;
-    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          AppTranslations.translate(context, 'app_language'),
-          style: TextStyle(color: Color(0xFFD32F2F))
-        ),
-        content: Container(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: languageList.length,
-            itemBuilder: (context, index) {
-              final lang = languageList[index];
-              return ListTile(
-                title: Text(lang['name']!),
-                trailing: currentLang == lang['code']
-                    ? Icon(Icons.check, color: Color(0xFFD32F2F))
-                    : null,
-                onTap: () async {
-                  await widget.languageManager.setLanguage(lang['code']!);
-                  Navigator.pop(context);
-                  
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${lang['name']} - Dil değiştirildi! ✅'),
-                      backgroundColor: Color(0xFFD32F2F),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+        title: Text('Uygulama Dili Seçin', style: TextStyle(color: Color(0xFFD32F2F))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLanguageOption('Türkçe', true),
+            _buildLanguageOption('İngilizce', false),
+            _buildLanguageOption('Almanca', false),
+            _buildLanguageOption('Fransızca', false),
+            _buildLanguageOption('Arapça', false),
+            _buildLanguageOption('İspanyolca', false),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              AppTranslations.translate(context, 'close'),
-              style: TextStyle(color: Color(0xFFD32F2F))
-            ),
+            child: Text('İptal', style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLanguageOption(String language, bool isSelected) {
+    return ListTile(
+      title: Text(language),
+      trailing: isSelected ? Icon(Icons.check, color: Color(0xFFD32F2F)) : null,
+      onTap: () {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$language seçildi - Yakında eklenecek! 🚀')),
+        );
+      },
     );
   }
 
@@ -2160,10 +1528,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          AppTranslations.translate(context, 'help'),
-          style: TextStyle(color: Color(0xFFD32F2F))
-        ),
+        title: Text('Yardım ve Destek', style: TextStyle(color: Color(0xFFD32F2F))),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -2194,7 +1559,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AppTranslations.translate(context, 'cancel')),
+            child: Text('İptal'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFD32F2F)),
@@ -2227,78 +1592,34 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showPrivacyPolicy() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          AppTranslations.translate(context, 'privacy_policy'),
-          style: TextStyle(color: Color(0xFFD32F2F))
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Bu uygulama kullanıcı gizliliği ve güvenliği ilkesini benimseyerek geliştirilmiştir. Daha fazla bilgi için gizlilik politikamıza göz atın.',
-                style: TextStyle(fontSize: 14),
-              ),
-              SizedBox(height: 16),
-              GestureDetector(
-                onTap: () async {
-                  final url = Uri.parse('https://docs.google.com/document/d/1nvIEnIz0nKCNHdiVMNw2-iMltjMxZwaw5TuPVKWLn4M/edit?usp=sharing');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
-                  }
-                },
-                child: Text(
-                  AppTranslations.translate(context, 'privacy_policy'),
-                  style: TextStyle(
-                    color: Color(0xFFD32F2F),
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              AppTranslations.translate(context, 'close'),
-              style: TextStyle(color: Color(0xFFD32F2F))
-            ),
-          ),
-        ],
-      ),
-    );
+    _showComingSoon('Gizlilik Politikası');
   }
 
   void _showAboutDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          AppTranslations.translate(context, 'about'),
-          style: TextStyle(color: Color(0xFFD32F2F))
-        ),
+        title: Text('PDF Reader Hakkında', style: TextStyle(color: Color(0xFFD32F2F))),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('PDF Reader v1.0.1', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('PDF Reader v1.0.0', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text('Gelişmiş PDF görüntüleme ve yönetim uygulaması.'),
+              Text('Gelişmiş PDF görüntüleme ve yönetim uygulaması'),
               SizedBox(height: 16),
               Text('Kullanılan Teknolojiler:', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text('• Flutter + Dart'),
-              Text('• PDF.js'),
-              Text('• HTML5 + WEB Kütüphaneleri'),
+              Text('• PDF.js - Mozilla'),
+              Text('• Flutter Framework'),
+              Text('• SQLite Database'),
+              Text('• InAppWebView'),
               SizedBox(height: 16),
+              Text('Lisans Bilgileri:', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Bu uygulama açık kaynak kodlu teknolojiler kullanılarak geliştirilmiştir.'),
+              SizedBox(height: 8),
               Text('© 2024 Dev Software'),
             ],
           ),
@@ -2306,10 +1627,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              AppTranslations.translate(context, 'close'),
-              style: TextStyle(color: Color(0xFFD32F2F))
-            ),
+            child: Text('Kapat', style: TextStyle(color: Color(0xFFD32F2F))),
           ),
         ],
       ),
@@ -2350,7 +1668,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         focusNode: _searchFocusNode,
         style: TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          hintText: AppTranslations.translate(context, 'search_hint'),
+          hintText: 'PDF dosyalarında ara...',
           hintStyle: TextStyle(color: Colors.white70),
           border: InputBorder.none,
         ),
@@ -2438,10 +1756,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           physics: NeverScrollableScrollPhysics(),
           children: [
             _buildHomeContent(),
-            ToolsScreen(
-              onPickFile: _pickPdfFile,
-              languageManager: widget.languageManager,
-            ),
+            ToolsScreen(onPickFile: _pickPdfFile),
             _buildFilesTab(),
           ],
         ),
@@ -2455,15 +1770,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: AppTranslations.translate(context, 'home'),
+              label: 'Ana Sayfa',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.build),
-              label: AppTranslations.translate(context, 'tools'),
+              label: 'Araçlar',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.folder),
-              label: AppTranslations.translate(context, 'files'),
+              label: 'Dosyalar',
             ),
           ],
         ),
@@ -2486,14 +1801,12 @@ class ViewerScreen extends StatefulWidget {
   final File? file;
   final String? fileUri;
   final String fileName;
-  final LanguageManager languageManager;
 
   const ViewerScreen({
     super.key,
     this.file,
     this.fileUri,
     required this.fileName,
-    required this.languageManager,
   });
 
   @override
@@ -2516,60 +1829,10 @@ class _ViewerScreenState extends State<ViewerScreen> {
         throw Exception('No file or URI provided');
       }
       final encodedFileUri = Uri.encodeComponent(fileUri);
-      
-      // WebView dil parametresini ekle
-      final langParam = widget.languageManager.webViewLangCode;
-      final viewerUrl = 'file:///android_asset/flutter_assets/assets/web/viewer.html?file=$encodedFileUri&lang=$langParam';
-      
-      print('WebView URL with lang: $viewerUrl');
+      final viewerUrl = 'file:///android_asset/flutter_assets/assets/web/viewer.html?file=$encodedFileUri';
       return viewerUrl;
     } catch (e) {
-      final langParam = widget.languageManager.webViewLangCode;
-      return 'file:///android_asset/flutter_assets/assets/web/viewer.html?lang=$langParam';
-    }
-  }
-
-  Future<void> _saveEditedPdfToDownloads(String filename, String base64Data) async {
-    try {
-      final downloadDir = Directory('/storage/emulated/0/Download/PDF Reader');
-      if (!await downloadDir.exists()) {
-        await downloadDir.create(recursive: true);
-      }
-
-      // "update_" prefix ile yeni dosya adı oluştur
-      String baseName = p.basenameWithoutExtension(filename);
-      
-      if (baseName.toLowerCase().startsWith('update_')) {
-        baseName = baseName.substring(7);
-      }
-      
-      final newFileName = 'update_$baseName.pdf';
-      final filePath = '${downloadDir.path}/$newFileName';
-
-      final bytes = base64Decode(base64Data);
-      await File(filePath).writeAsBytes(bytes);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ PDF başarıyla kaydedildi: $newFileName'),
-            backgroundColor: Color(0xFFD32F2F),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-
-      print('📁 PDF kaydedildi: $filePath');
-    } catch (e) {
-      print('❌ PDF kaydetme hatası: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ PDF kaydedilirken hata: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      return 'file:///android_asset/flutter_assets/assets/web/viewer.html';
     }
   }
 
@@ -2628,26 +1891,6 @@ class _ViewerScreenState extends State<ViewerScreen> {
                     allowUniversalAccessFromFileURLs: true,
                     supportZoom: true,
                   ),
-                  onWebViewCreated: (controller) {
-                    _controller = controller;
-                    
-                    controller.addJavaScriptHandler(
-                      handlerName: 'onPdfSaved',
-                      callback: (args) {
-                        if (args.length >= 2) {
-                          final filename = args[0] as String;
-                          final base64Data = args[1] as String;
-                          _saveEditedPdfToDownloads(filename, base64Data);
-                        }
-                        return {};
-                      },
-                    );
-                    
-                    widget.languageManager.addListener(() {
-                      final newUrl = _viewerUrl();
-                      controller.loadUrl(urlRequest: URLRequest(url: WebUri(newUrl)));
-                    });
-                  },
                   onProgressChanged: (controller, progress) {
                     setState(() {
                       _progress = progress / 100;
