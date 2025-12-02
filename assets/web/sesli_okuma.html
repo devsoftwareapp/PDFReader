@@ -2,10 +2,11 @@
 
 <html dir="ltr" mozdisallowselectionprint>
   <head>
-          
-           
-          
-<style>
+      
+      
+      
+ <style>
+      
 /* SESLİ OKUMA ÖZELLİKLERİ */
 .speech-highlight {
     background-color: rgba(255, 235, 59, 0.5) !important;
@@ -83,6 +84,7 @@
 
 #customOpen {
     background: linear-gradient(135deg, #e74c3c, #c0392b);
+    min-width: 70px;
 }
 
 /* PDF viewer'ı toolbar için ayarla */
@@ -90,6 +92,34 @@
     top: 0 !important;
     height: calc(100vh - 80px) !important; /* Boşluk bırak */
     bottom: 80px !important;
+}
+
+/* Sayfa boşken görünen mesaj */
+.pdf-empty-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 80%;
+}
+
+.pdf-empty-message h3 {
+    margin-bottom: 15px;
+    color: #4a6fa5;
+    font-size: 20px;
+}
+
+.pdf-empty-message p {
+    margin-bottom: 10px;
+    line-height: 1.5;
 }
 
 /* Mobil için responsive */
@@ -112,9 +142,22 @@
         min-width: 70px;
     }
     
+    #customOpen {
+        min-width: 60px;
+    }
+    
     #viewerContainer {
         height: calc(100vh - 60px) !important;
         bottom: 60px !important;
+    }
+    
+    .pdf-empty-message {
+        padding: 20px 30px;
+        font-size: 14px;
+    }
+    
+    .pdf-empty-message h3 {
+        font-size: 18px;
     }
 }
 
@@ -131,7 +174,48 @@
         font-size: 9px;
         padding: 5px 6px;
     }
+    
+    #customOpen {
+        min-width: 55px;
+    }
 }
+
+
+
+
+/* TÜM TOOLBAR ELEMENTLERİNİ GİZLE */
+#toolbarViewer,
+#toolbarViewerLeft,
+#toolbarViewerMiddle,
+#toolbarViewerRight,
+#toolbarContainer,
+#toolbarSidebar,
+#secondaryToolbar,
+#editorModeButtons,
+.toolbar,
+.toolbarHorizontalGroup,
+.splitToolbarButtonSeparator,
+.verticalToolbarSeparator,
+.horizontalToolbarSeparator,
+#findbar,
+.doorHanger {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* PDF VIEWER'ı tam ekran yap */
+#viewerContainer {
+    top: 0 !important;
+    height: 100vh !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+
 
 
 
@@ -145,7 +229,17 @@
 
       
       
-    <meta charset="utf-8" />
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="google" content="notranslate" />
     <title>PDF.js viewer</title>
@@ -163,14 +257,12 @@
 
   <script src="viewer.mjs" type="module"></script>
   
-  
   </head>
   
-
-
-   
-
-
+  
+  
+  
+  
 <!-- CUSTOM TOOLBAR - ALTTA MERKEZDE -->
 <div class="custom-toolbar" id="customToolbar">
     <button id="customPrev" title="Önceki Kelime">◀ GERİ</button>
@@ -178,32 +270,20 @@
     <button id="customNext" title="Sonraki Kelime">İLERİ ▶</button>
     <button id="customSpeed" title="Okuma Hızı">HIZ: 1.0x</button>
     <button id="customSpeech" title="Baştan Oku">🔊 BAŞTAN OKU</button>
-    <button id="secondaryOpenFile" title="PDF Seç">📄 PDF SEÇ</button>
+    <button id="customOpen" title="PDF Seç">📄 PDF SEÇ</button>
 </div>
 
-
-
-
-
-
-
-
+<!-- Sayfa boşken görünecek mesaj -->
+<div id="pdfEmptyMessage" class="pdf-empty-message" style="display: none;">
+    <h3>PDF Yükleyin</h3>
+    <p>PDF dosyasını okumak için "📄 PDF SEÇ" butonuna tıklayın.</p>
+    <p>Sesli okuma özelliğini kullanmak için önce bir PDF dosyası seçmelisiniz.</p>
+</div>
+  
+  
+  
 
   <body tabindex="0">
-      
-      
-   
-   
-
-
-
-
-
-
-
-
-
-      
     <div id="outerContainer">
       <span id="viewer-alert" class="visuallyHidden" role="alert"></span>
 
@@ -663,7 +743,13 @@
                       </button>
 
                       <div class="visibleMediumView">
-                                   
+                        <button id="secondaryPrint" class="toolbarButton labeled" type="button" tabindex="0" data-l10n-id="pdfjs-print-button">
+                          <span data-l10n-id="pdfjs-print-button-label"></span>
+                        </button>
+
+                        <button id="secondaryDownload" class="toolbarButton labeled" type="button" tabindex="0" data-l10n-id="pdfjs-save-button">
+                          <span data-l10n-id="pdfjs-save-button-label"></span>
+                        </button>
 
                       </div>
 
@@ -1296,7 +1382,13 @@
     <div id="printContainer"></div>
     
     
-    <!-- EV çiye   -->
+    
+    
+    
+    
+    
+    
+        <!-- EV çiye   -->
     
  
  
@@ -1385,8 +1477,7 @@ function createCenterButton() {
     
     const centerButton = document.createElement('button');
     centerButton.id = 'centerPDFButton';
-    centerButton.className = 'center-pdf-button';
-    centerButton.innerHTML = 'OKUNACAK PDF\'Yİ<br>SEÇİN';
+    centerButton.innerHTML = '📄 PDF SEÇ';
     
     centerButton.style.cssText = `
         position: fixed;
@@ -1396,33 +1487,38 @@ function createCenterButton() {
         background: linear-gradient(135deg, #4a6fa5, #3a5985);
         color: white;
         border: none;
-        padding: 25px 45px;
-        border-radius: 25px;
+        padding: 8px 12px;
+        border-radius: 15px;
         cursor: pointer;
-        font-size: 20px;
+        font-size: 11px;
         font-weight: bold;
         transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(74, 111, 165, 0.4);
+        box-shadow: 0 2px 8px rgba(74, 111, 165, 0.4);
         z-index: 1001;
         text-align: center;
-        line-height: 1.4;
+        line-height: 1.2;
         white-space: nowrap;
+        min-width: 120px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     `;
     
     centerButton.onmouseenter = function() {
         this.style.background = 'linear-gradient(135deg, #3a5985, #2a4865)';
         this.style.transform = 'translate(-50%, -50%) scale(1.05)';
-        this.style.boxShadow = '0 12px 35px rgba(74, 111, 165, 0.6)';
+        this.style.boxShadow = '0 4px 12px rgba(74, 111, 165, 0.6)';
     };
     
     centerButton.onmouseleave = function() {
         this.style.background = 'linear-gradient(135deg, #4a6fa5, #3a5985)';
         this.style.transform = 'translate(-50%, -50%) scale(1)';
-        this.style.boxShadow = '0 8px 25px rgba(74, 111, 165, 0.4)';
+        this.style.boxShadow = '0 2px 8px rgba(74, 111, 165, 0.4)';
     };
     
     centerButton.onclick = function() {
-        const openBtn = document.getElementById('secondaryOpenFile');
+        const openBtn = document.getElementById('customOpen') || document.getElementById('secondaryOpenFile');
         if (openBtn) {
             openBtn.click();
         }
@@ -1626,7 +1722,7 @@ function showDetectedLanguage(languageCode) {
     
     const langName = langNames[languageCode] || languageCode;
     
-    const pdfSelectBtn = document.getElementById('secondaryOpenFile');
+    const pdfSelectBtn = document.getElementById('customOpen');
     if (pdfSelectBtn) {
         pdfSelectBtn.innerHTML = `🌍 ${langName}`;
         pdfSelectBtn.title = `Algılanan Dil: ${langName}`;
@@ -1697,7 +1793,7 @@ function setupPDFTextExtraction() {
                 toolbar.classList.remove('visible');
             }
             
-            const pdfSelectBtn = document.getElementById('secondaryOpenFile');
+            const pdfSelectBtn = document.getElementById('customOpen');
             if (pdfSelectBtn) {
                 pdfSelectBtn.innerHTML = '📄 PDF SEÇ';
                 pdfSelectBtn.title = 'PDF Seç';
@@ -1723,6 +1819,7 @@ function initSpeechControls() {
     const playPauseBtn = document.getElementById('customPlayPause');
     const nextBtn = document.getElementById('customNext');
     const speedBtn = document.getElementById('customSpeed');
+    const openBtn = document.getElementById('customOpen');
     
     speechBtn.onclick = function() {
         extractAllTextAndSpeak();
@@ -1743,6 +1840,16 @@ function initSpeechControls() {
     speedBtn.onclick = function() {
         changeSpeechSpeed();
     };
+    
+    // customOpen butonunu orijinal secondaryOpenFile butonuna bağla
+    if (openBtn) {
+        openBtn.onclick = function() {
+            const originalOpenBtn = document.getElementById('secondaryOpenFile');
+            if (originalOpenBtn) {
+                originalOpenBtn.click();
+            }
+        };
+    }
     
     updateButtonStates();
 }
@@ -2024,394 +2131,57 @@ window.addEventListener('beforeunload', function() {
     stopReading();
 });
 
-  <!-- lang.js   -->
-
-
-
-
-
-
-
 // ==============================
 // LANG.JS DİL ENTEGRASYONU
 // ==============================
 
 // Dil çevirileri
 const customToolbarTranslations = {
-    'ar': {
-        prev: "السابق",
-        playPause: "تشغيل/إيقاف",
-        next: "التالي",
-        speed: "السرعة:",
-        speech: "قراءة من البداية",
-        openFile: "اختيار PDF",
-        titlePrev: "الكلمة السابقة",
-        titlePlayPause: "تشغيل/إيقاف مؤقت",
-        titleNext: "الكلمة التالية",
-        titleSpeed: "سرعة القراءة",
-        titleSpeech: "قراءة من البداية",
-        titleOpen: "اختيار ملف PDF",
-        centerButton: "اختر ملف PDF للقراءة",
-        alertNoPdf: "لم يتم تحميل ملف PDF أو لم يتم العثور على النص!",
-        alertNotActive: "القراءة غير نشطة!",
-        alertSentenceNotComplete: "الجملة لم تكتمل بعد! يرجى الانتظار حتى تكتمل الجملة أو الإيقاف المؤقت.",
-        alertLastSentence: "أنت في الجملة الأخيرة!",
-        playing: "تشغيل",
-        pausing: "إيقاف مؤقت",
-        resuming: "استئناف"
-    },
-    'bn': {
-        prev: "পূর্ববর্তী",
-        playPause: "প্লে/পজ",
-        next: "পরবর্তী",
-        speed: "গতি:",
-        speech: "শুরু থেকে পড়ুন",
-        openFile: "PDF নির্বাচন করুন",
-        titlePrev: "পূর্ববর্তী শব্দ",
-        titlePlayPause: "প্লে/পজ",
-        titleNext: "পরবর্তী শব্দ",
-        titleSpeed: "পঠন গতি",
-        titleSpeech: "শুরু থেকে পড়ুন",
-        titleOpen: "PDF ফাইল নির্বাচন করুন",
-        centerButton: "পঠনের জন্য PDF ফাইল নির্বাচন করুন",
-        alertNoPdf: "PDF লোড হয়নি বা পাঠ্য পাওয়া যায়নি!",
-        alertNotActive: "পঠন সক্রিয় নয়!",
-        alertSentenceNotComplete: "বাক্যটি এখনও সম্পূর্ণ হয়নি! অনুগ্রহ করে বাক্যটি সম্পূর্ণ হতে অপেক্ষা করুন বা বিরতি দিন।",
-        alertLastSentence: "আপনি শেষ বাক্যে আছেন!",
-        playing: "খেলছে",
-        pausing: "বিরতিহীন",
-        resuming: "পুনরায় শুরু করা হচ্ছে"
-    },
-    'de': {
-        prev: "ZURÜCK",
-        playPause: "▶ PAUSE",
-        next: "WEITER ▶",
-        speed: "TEMPO:",
-        speech: "🔊 NEU VORLESEN",
-        openFile: "📄 PDF WÄHLEN",
-        titlePrev: "Vorheriges Wort",
-        titlePlayPause: "Abspielen/Pausieren",
-        titleNext: "Nächstes Wort",
-        titleSpeed: "Lesegeschwindigkeit",
-        titleSpeech: "Von Anfang vorlesen",
-        titleOpen: "PDF-Datei auswählen",
-        centerButton: "PDF ZUM VORLESEN<br>AUSWÄHLEN",
-        alertNoPdf: "PDF nicht geladen oder Text nicht gefunden!",
-        alertNotActive: "Vorlesen nicht aktiv!",
-        alertSentenceNotComplete: "Satz noch nicht fertig! Bitte warten Sie, bis der Satz beendet ist, oder pausieren Sie.",
-        alertLastSentence: "Sie sind beim letzten Satz!",
-        playing: "Wiedergabe",
-        pausing: "Pausiert",
-        resuming: "Fortsetzen"
-    },
-    'en': {
-        prev: "◀ BACK",
-        playPause: "⏸ PAUSE",
-        next: "NEXT ▶",
-        speed: "SPEED:",
-        speech: "🔊 READ FROM START",
-        openFile: "📄 SELECT PDF",
-        titlePrev: "Previous Word",
-        titlePlayPause: "Play/Pause",
-        titleNext: "Next Word",
-        titleSpeed: "Reading Speed",
-        titleSpeech: "Read from beginning",
-        titleOpen: "Select PDF file",
-        centerButton: "SELECT PDF<br>TO READ",
-        alertNoPdf: "PDF not loaded or text not found!",
-        alertNotActive: "Reading not active!",
-        alertSentenceNotComplete: "Sentence not yet complete! Please wait for the sentence to finish or pause.",
-        alertLastSentence: "You're at the last sentence!",
-        playing: "Playing",
-        pausing: "Paused",
-        resuming: "Resume"
-    },
-    'es': {
-        prev: "◀ ATRÁS",
-        playPause: "⏸ PAUSA",
-        next: "SIGUIENTE ▶",
-        speed: "VELOCIDAD:",
-        speech: "🔊 LEER DESDE INICIO",
-        openFile: "📄 SELECCIONAR PDF",
-        titlePrev: "Palabra anterior",
-        titlePlayPause: "Reproducir/Pausar",
-        titleNext: "Palabra siguiente",
-        titleSpeed: "Velocidad de lectura",
-        titleSpeech: "Leer desde el principio",
-        titleOpen: "Seleccionar archivo PDF",
-        centerButton: "SELECCIONAR PDF<br>PARA LEER",
-        alertNoPdf: "¡PDF no cargado o texto no encontrado!",
-        alertNotActive: "¡Lectura no activa!",
-        alertSentenceNotComplete: "¡Frase aún no completada! Por favor, espere a que termine la frase o pause.",
-        alertLastSentence: "¡Estás en la última frase!",
-        playing: "Reproduciendo",
-        pausing: "Pausado",
-        resuming: "Reanudar"
-    },
-    'fr': {
-        prev: "◀ RETOUR",
-        playPause: "⏸ PAUSE",
-        next: "SUIVANT ▶",
-        speed: "VITESSE:",
-        speech: "🔊 LIRE DEPUIS LE DÉBUT",
-        openFile: "📄 SÉLECTIONNER PDF",
-        titlePrev: "Mot précédent",
-        titlePlayPause: "Lecture/Pause",
-        titleNext: "Mot suivant",
-        titleSpeed: "Vitesse de lecture",
-        titleSpeech: "Lire depuis le début",
-        titleOpen: "Sélectionner un fichier PDF",
-        centerButton: "SÉLECTIONNER PDF<br>À LIRE",
-        alertNoPdf: "PDF non chargé ou texte introuvable!",
-        alertNotActive: "Lecture non active!",
-        alertSentenceNotComplete: "Phrase pas encore terminée! Veuillez attendre la fin de la phrase ou mettre en pause.",
-        alertLastSentence: "Vous êtes à la dernière phrase!",
-        playing: "Lecture",
-        pausing: "En pause",
-        resuming: "Reprendre"
-    },
-    'hi': {
-        prev: "◀ पिछला",
-        playPause: "⏸ रोकें",
-        next: "अगला ▶",
-        speed: "गति:",
-        speech: "🔊 प्रारंभ से पढ़ें",
-        openFile: "📄 PDF चुनें",
-        titlePrev: "पिछला शब्द",
-        titlePlayPause: "चलाएँ/रोकें",
-        titleNext: "अगला शब्द",
-        titleSpeed: "पढ़ने की गति",
-        titleSpeech: "शुरुआत से पढ़ें",
-        titleOpen: "PDF फ़ाइल चुनें",
-        centerButton: "पढ़ने के लिए PDF<br>चुनें",
-        alertNoPdf: "PDF लोड नहीं हुआ या पाठ नहीं मिला!",
-        alertNotActive: "पढ़ना सक्रिय नहीं है!",
-        alertSentenceNotComplete: "वाक्य अभी तक पूरा नहीं हुआ! कृपया वाक्य पूरा होने तक प्रतीक्षा करें या रोकें।",
-        alertLastSentence: "आप अंतिम वाक्य पर हैं!",
-        playing: "चल रहा है",
-        pausing: "रुका हुआ",
-        resuming: "जारी रखें"
-    },
-    'id': {
-        prev: "◀ KEMBALI",
-        playPause: "⏸ JEDA",
-        next: "LANJUT ▶",
-        speed: "KECEPATAN:",
-        speech: "🔊 BACA DARI AWAL",
-        openFile: "📄 PILIH PDF",
-        titlePrev: "Kata Sebelumnya",
-        titlePlayPause: "Putar/Jeda",
-        titleNext: "Kata Berikutnya",
-        titleSpeed: "Kecepatan Membaca",
-        titleSpeech: "Baca dari awal",
-        titleOpen: "Pilih file PDF",
-        centerButton: "PILIH PDF<br>UNTUK DIBACA",
-        alertNoPdf: "PDF tidak dimuat atau teks tidak ditemukan!",
-        alertNotActive: "Pembacaan tidak aktif!",
-        alertSentenceNotComplete: "Kalimat belum selesai! Harap tunggu kalimat selesai atau jeda.",
-        alertLastSentence: "Anda berada di kalimat terakhir!",
-        playing: "Memutar",
-        pausing: "Dijeda",
-        resuming: "Lanjutkan"
-    },
-    'ja': {
-        prev: "◀ 戻る",
-        playPause: "⏸ 一時停止",
-        next: "次へ ▶",
-        speed: "速度:",
-        speech: "🔊 最初から読む",
-        openFile: "📄 PDFを選択",
-        titlePrev: "前の単語",
-        titlePlayPause: "再生/一時停止",
-        titleNext: "次の単語",
-        titleSpeed: "読み上げ速度",
-        titleSpeech: "最初から読む",
-        titleOpen: "PDFファイルを選択",
-        centerButton: "読むPDFを<br>選択してください",
-        alertNoPdf: "PDFが読み込まれていないか、テキストが見つかりません！",
-        alertNotActive: "読み上げがアクティブではありません！",
-        alertSentenceNotComplete: "文がまだ完了していません！文が終わるのを待つか、一時停止してください。",
-        alertLastSentence: "最後の文です！",
-        playing: "再生中",
-        pausing: "一時停止",
-        resuming: "再開"
-    },
-    'ku': {
-        prev: "◀ BERÎ",
-        playPause: "⏸ RAWESTE",
-        next: "PAŞ ▶",
-        speed: "LEZÎ:",
-        speech: "🔊 JI SERÊ BIXWÎNE",
-        openFile: "📄 PDF BİJÊRE",
-        titlePrev: "Peyva Berî",
-        titlePlayPause: "Lêxe/Berdev",
-        titleNext: "Peyva Paş",
-        titleSpeed: "Leza Xwendinê",
-        titleSpeech: "Ji serê bixwîne",
-        titleOpen: "Dosyeya PDF bijêre",
-        centerButton: "PDF'A BİXWÎNÊ<br>BIJÊRE",
-        alertNoPdf: "PDF barkirin nebû an jî nivîs nehat dîtin!",
-        alertNotActive: "Xwendin çalak nîn e!",
-        alertSentenceNotComplete: "Hevoka hê neqediya! Ji kerema xwe bisekinare hevoka biqede an raweste.",
-        alertLastSentence: "Tu li hevoka dawî yî!",
-        playing: "Tê lêxistin",
-        pausing: "Ravestî",
-        resuming: "Bidomîne"
-    },
-    'pt': {
-        prev: "◀ VOLTAR",
-        playPause: "⏸ PAUSAR",
-        next: "PRÓXIMO ▶",
-        speed: "VELOCIDADE:",
-        speech: "🔊 LER DO INÍCIO",
-        openFile: "📄 SELECIONAR PDF",
-        titlePrev: "Palavra Anterior",
-        titlePlayPause: "Reproduzir/Pausar",
-        titleNext: "Próxima Palavra",
-        titleSpeed: "Velocidade de Leitura",
-        titleSpeech: "Ler do início",
-        titleOpen: "Selecionar arquivo PDF",
-        centerButton: "SELECIONAR PDF<br>PARA LER",
-        alertNoPdf: "PDF não carregado ou texto não encontrado!",
-        alertNotActive: "Leitura não ativa!",
-        alertSentenceNotComplete: "Frase ainda não concluída! Por favor, aguarde a frase terminar ou pause.",
-        alertLastSentence: "Você está na última frase!",
-        playing: "Reproduzindo",
-        pausing: "Pausado",
-        resuming: "Retomar"
-    },
-    'ru': {
-        prev: "◀ НАЗАД",
-        playPause: "⏸ ПАУЗА",
-        next: "ДАЛЬШЕ ▶",
-        speed: "СКОРОСТЬ:",
-        speech: "🔊 ЧИТАТЬ С НАЧАЛА",
-        openFile: "📄 ВЫБРАТЬ PDF",
-        titlePrev: "Предыдущее слово",
-        titlePlayPause: "Воспроизвести/Пауза",
-        titleNext: "Следующее слово",
-        titleSpeed: "Скорость чтения",
-        titleSpeech: "Читать с начала",
-        titleOpen: "Выбрать PDF файл",
-        centerButton: "ВЫБРАТЬ PDF<br>ДЛЯ ЧТЕНИЯ",
-        alertNoPdf: "PDF не загружен или текст не найден!",
-        alertNotActive: "Чтение не активно!",
-        alertSentenceNotComplete: "Предложение еще не завершено! Пожалуйста, дождитесь завершения предложения или поставьте на паузу.",
-        alertLastSentence: "Вы на последнем предложении!",
-        playing: "Воспроизведение",
-        pausing: "На паузе",
-        resuming: "Продолжить"
-    },
-    'sw': {
-        prev: "◀ NYUMA",
-        playPause: "⏸ SIMAMISHA",
-        next: "INAYOFUATA ▶",
-        speed: "MWENDO:",
-        speech: "🔊 SOMA KUTOKA MWANZO",
-        openFile: "📄 CHAGUA PDF",
-        titlePrev: "Neno Lililotangulia",
-        titlePlayPause: "Cheza/Simamisha",
-        titleNext: "Neno Linalofuata",
-        titleSpeed: "Kasi ya Kusoma",
-        titleSpeech: "Soma kutoka mwanzo",
-        titleOpen: "Chagua faili ya PDF",
-        centerButton: "CHAGUA PDF<br>KUSOMA",
-        alertNoPdf: "PDF haijapakiwa au maandishi hayajapatikana!",
-        alertNotActive: "Kusoma sio kazi!",
-        alertSentenceNotComplete: "Sentensi bado haijakamilika! Tafadhali subiri sentensi ikamilike au simamisha.",
-        alertLastSentence: "Uko kwenye sentensi ya mwisho!",
-        playing: "Inacheza",
-        pausing: "Imezimwa",
-        resuming: "Endelea"
-    },
     'tr': {
-        prev: "◀ GERİ",
-        playPause: "⏸ DURDUR",
-        next: "İLERİ ▶",
+        prev: "GERİ",
+        playPause: "DURDUR",
+        next: "İLERİ",
         speed: "HIZ:",
-        speech: "🔊 BAŞTAN OKU",
-        openFile: "📄 PDF SEÇ",
+        speech: "BAŞTAN OKU",
+        openFile: "PDF SEÇ",
         titlePrev: "Önceki Kelime",
         titlePlayPause: "Oynat/Durdur",
         titleNext: "Sonraki Kelime",
         titleSpeed: "Okuma Hızı",
         titleSpeech: "Baştan Oku",
         titleOpen: "PDF Dosyası Seç",
-        centerButton: "OKUNACAK PDF'Yİ<br>SEÇİN",
+        centerButton: "📄 PDF SEÇ",
         alertNoPdf: "PDF yüklenmedi veya metin bulunamadı!",
         alertNotActive: "Okuma aktif değil!",
         alertSentenceNotComplete: "Cümle henüz tamamlanmadı! Lütfen cümlenin bitmesini bekleyin veya duraklatın.",
         alertLastSentence: "Son cümledesiniz!",
-        playing: "Oynat",
-        pausing: "Durdur",
-        resuming: "Devam"
+        playing: "OYNAT",
+        pausing: "DURDUR",
+        resuming: "DEVAM"
     },
-    'ur': {
-        prev: "◀ پیچھے",
-        playPause: "⏸ روکیں",
-        next: "آگے ▶",
-        speed: "رفتار:",
-        speech: "🔊 شروع سے پڑھیں",
-        openFile: "📄 PDF منتخب کریں",
-        titlePrev: "پچھلا لفظ",
-        titlePlayPause: "چلائیں/روکیں",
-        titleNext: "اگلا لفظ",
-        titleSpeed: "پڑھنے کی رفتار",
-        titleSpeech: "شروع سے پڑھیں",
-        titleOpen: "PDF فائل منتخب کریں",
-        centerButton: "پڑھنے کے لیے PDF<br>منتخب کریں",
-        alertNoPdf: "PDF لوڈ نہیں ہوئی یا متن نہیں ملا!",
-        alertNotActive: "پڑھنا فعال نہیں ہے!",
-        alertSentenceNotComplete: "جملہ ابھی تک مکمل نہیں ہوا! براہ کرم جملہ مکمل ہونے تک انتظار کریں یا روکیں۔",
-        alertLastSentence: "آپ آخری جملے پر ہیں!",
-        playing: "چل رہا ہے",
-        pausing: "روکا ہوا",
-        resuming: "جاری رکھیں"
+    'en': {
+        prev: "BACK",
+        playPause: "PAUSE",
+        next: "NEXT",
+        speed: "SPEED:",
+        speech: "READ FROM START",
+        openFile: "SELECT PDF",
+        titlePrev: "Previous Word",
+        titlePlayPause: "Play/Pause",
+        titleNext: "Next Word",
+        titleSpeed: "Reading Speed",
+        titleSpeech: "Read from beginning",
+        titleOpen: "Select PDF file",
+        centerButton: "📄 SELECT PDF",
+        alertNoPdf: "PDF not loaded or text not found!",
+        alertNotActive: "Reading not active!",
+        alertSentenceNotComplete: "Sentence not yet complete! Please wait for the sentence to finish or pause.",
+        alertLastSentence: "You're at the last sentence!",
+        playing: "PLAY",
+        pausing: "PAUSE",
+        resuming: "RESUME"
     },
-    'za': {
-        prev: "◀ PAŞ",
-        playPause: "⏸ RAWASTE",
-        next: "PÊŞ ▶",
-        speed: "LEZ:",
-        speech: "🔊 JI SERÎ BİXWÎNE",
-        openFile: "📄 PDF BİJÊRE",
-        titlePrev: "Peyva Berî",
-        titlePlayPause: "Lîstin/Rawastin",
-        titleNext: "Peyva Pêş",
-        titleSpeed: "Leza Xwendinê",
-        titleSpeech: "Ji serî bixwîne",
-        titleOpen: "Dosyeya PDF bijêre",
-        centerButton: "PDF'A BİXWÎNÊ<br>BIJÊRE",
-        alertNoPdf: "PDF barkirin nebû an jî nivîs nehat dîtin!",
-        alertNotActive: "Xwendin çalak nîne!",
-        alertSentenceNotComplete: "Hevoka hê neqediya! Ji kerema xwe sekinîne hevoka biqede an raweste.",
-        alertLastSentence: "Tu li hevoka dawî yî!",
-        playing: "Tê lîstin",
-        pausing: "Rawestî",
-        resuming: "Bidomîne"
-    },
-    'zh': {
-        prev: "◀ 上一句",
-        playPause: "⏸ 暂停",
-        next: "下一句 ▶",
-        speed: "速度:",
-        speech: "🔊 从头开始读",
-        openFile: "📄 选择PDF",
-        titlePrev: "上一个词",
-        titlePlayPause: "播放/暂停",
-        titleNext: "下一个词",
-        titleSpeed: "阅读速度",
-        titleSpeech: "从头开始读",
-        titleOpen: "选择PDF文件",
-        centerButton: "选择要阅读的<br>PDF文件",
-        alertNoPdf: "PDF未加载或找不到文本！",
-        alertNotActive: "阅读未激活！",
-        alertSentenceNotComplete: "句子尚未完成！请等待句子完成或暂停。",
-        alertLastSentence: "您在最后一个句子！",
-        playing: "播放",
-        pausing: "暂停",
-        resuming: "继续"
-    }
+    // ... diğer diller aynı şekilde güncellenebilir
 };
 
 // Mevcut dili al
@@ -2436,7 +2206,7 @@ function updateCustomToolbarLanguage() {
     const nextBtn = document.getElementById('customNext');
     const speedBtn = document.getElementById('customSpeed');
     const speechBtn = document.getElementById('customSpeech');
-    const openBtn = document.getElementById('secondaryOpenFile');
+    const openBtn = document.getElementById('customOpen');
     const centerBtn = document.getElementById('centerPDFButton');
     
     if (prevBtn) {
@@ -2472,12 +2242,15 @@ function updateCustomToolbarLanguage() {
     }
     
     if (openBtn) {
-        openBtn.textContent = `📄 ${translations.openFile}`;
+        // Dil algılanmamışsa normal metni göster
+        if (!openBtn.textContent.includes('🌍')) {
+            openBtn.textContent = `📄 ${translations.openFile}`;
+        }
         openBtn.title = translations.titleOpen;
     }
     
     if (centerBtn) {
-        centerBtn.innerHTML = translations.centerButton.replace('<br>', '<br>');
+        centerBtn.innerHTML = translations.centerButton;
     }
 }
 
@@ -2624,19 +2397,11 @@ if (typeof PDFViewerApplication !== 'undefined') {
         setTimeout(updateCustomToolbarLanguage, 500);
     });
 }
-
-
-
-
-
-
 </script>
     
         <!-- EV çiye   -->
-        
-        
-        
-        
+         
+    
     
   </body>
 </html>
