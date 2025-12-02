@@ -26,18 +26,18 @@ class _PdfTestPageState extends State<PdfTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: InAppWebView(
-        initialFile: "web/index.html",
+        initialFile: "assets/web/index.html",
         initialOptions: InAppWebViewGroupOptions(
           crossPlatform: InAppWebViewOptions(
             javaScriptEnabled: true,
-            // PDF.js worker’ın file:// erişimi için ŞART
+
+            // PDF.js worker için gerekli
             allowFileAccessFromFileURLs: true,
             allowUniversalAccessFromFileURLs: true,
           ),
           android: AndroidInAppWebViewOptions(
             domStorageEnabled: true,
             allowContentAccess: true,
-            // allowFileAccess KALKTI → koymuyoruz
             useHybridComposition: true,
           ),
         ),
