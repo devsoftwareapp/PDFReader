@@ -2,30 +2,12 @@
 
 <html dir="ltr" mozdisallowselectionprint>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="google" content="notranslate" />
-    <title>PDF.js viewer</title>
 
-<!-- This snippet is used in production (included from viewer.html) -->
-<link rel="resource" type="application/l10n" href="locale/locale.json" />
-<script src="../build/pdf.mjs" type="module"></script>
 
-    <link rel="stylesheet" href="viewer.css" />
 
-  <script src="viewer.mjs" type="module"></script>
-  
-  
-  
-  <!-- MERVANİ -->
-  
-  
-  
 
-  
-  
-  
-  
+
+<!-- 🔥 Base64 → PDF Yükleme mantığı -->
 <script>
 (function() {
   function loadBase64Pdf() {
@@ -50,15 +32,51 @@
     }, 50);
   }
 
-  // 1) Normal PDF.js yükleme event’i
+  // PDF.js viewer yükleme event’i
   document.addEventListener("webviewerloaded", loadBase64Pdf);
 
-  // 2) Redirect sonrası event çalışmazsa → fallback
+  // Redirect sırasında event kaçarsa → fallback
   window.addEventListener("DOMContentLoaded", () => {
     setTimeout(loadBase64Pdf, 300);
   });
 })();
 </script>
+
+<!-- 🔥 Local HTTP Server’dan worker kullan (Flutter için tek doğru yol) -->
+<script type="module">
+  import * as pdfjsLib from "../build/pdf.mjs";
+
+  // Flutter main.dart → window.PDF_WORKER buraya set ediyor.
+  pdfjsLib.GlobalWorkerOptions.workerSrc = window.PDF_WORKER;
+</script>
+
+
+
+    
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="google" content="notranslate" />
+    <title>PDF.js viewer</title>
+
+<!-- This snippet is used in production (included from viewer.html) -->
+<link rel="resource" type="application/l10n" href="locale/locale.json" />
+<script src="../build/pdf.mjs" type="module"></script>
+
+    <link rel="stylesheet" href="viewer.css" />
+
+  <script src="viewer.mjs" type="module"></script>
+  
+  
+  
+  <!-- MERVANİ -->
+  
+  
+  
+
+  
+  
+  
+  
   
   
   
