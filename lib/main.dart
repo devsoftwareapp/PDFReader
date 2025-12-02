@@ -110,17 +110,17 @@ class PdfReaderApp extends StatelessWidget {
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.white,
           selectedItemColor: Color(0xFFD32F2F),
-          unselectedItemColor: Colors.grey,  // SABIT YAPILDI
+          unselectedItemColor: Colors.grey,
           type: BottomNavigationBarType.fixed,
         ),
         tabBarTheme: const TabBarTheme(
           labelColor: Color(0xFFD32F2F),
-          unselectedLabelColor: Colors.grey,  // SABIT YAPILDI
+          unselectedLabelColor: Colors.grey,
           indicator: UnderlineTabIndicator(
             borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
           ),
         ),
-        cardTheme: CardTheme(
+        cardTheme: const CardTheme(
           elevation: 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
@@ -128,9 +128,9 @@ class PdfReaderApp extends StatelessWidget {
       darkTheme: ThemeData(
         primarySwatch: Colors.red,
         primaryColor: const Color(0xFFD32F2F),
-        scaffoldBackgroundColor: Colors.grey[900],
+        scaffoldBackgroundColor: const Color(0xFF121212),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF424242),  // SABIT RENK
+          backgroundColor: Color(0xFF1E1E1E),
           foregroundColor: Colors.white,
           elevation: 2,
           systemOverlayStyle: SystemUiOverlayStyle.light,
@@ -145,21 +145,21 @@ class PdfReaderApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF424242),  // SABIT RENK
+          backgroundColor: Color(0xFF1E1E1E),
           selectedItemColor: Color(0xFFD32F2F),
-          unselectedItemColor: Colors.grey,  // SABIT YAPILDI
+          unselectedItemColor: Colors.grey,
           type: BottomNavigationBarType.fixed,
         ),
         tabBarTheme: const TabBarTheme(
           labelColor: Color(0xFFD32F2F),
-          unselectedLabelColor: Colors.grey,  // SABIT YAPILDI
+          unselectedLabelColor: Colors.grey,
           indicator: UnderlineTabIndicator(
             borderSide: BorderSide(width: 2.0, color: Color(0xFFD32F2F)),
           ),
         ),
         cardTheme: const CardTheme(
           elevation: 2,
-          color: Color(0xFF424242),  // SABIT RENK
+          color: Color(0xFF1E1E1E),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         textTheme: const TextTheme(
@@ -182,7 +182,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> {
   List<String> _pdfFiles = [];
   List<String> _favoriteFiles = [];
   List<String> _recentFiles = [];
@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     _intentChannel.setMethodCallHandler(_handleIntentMethodCall);
     
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsFlutterBinding.instance.addPostFrameCallback((_) {
       _handleInitialIntent();
     });
   }
@@ -584,7 +584,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       final data = await file.readAsBytes();
       await Printing.layoutPdf(onLayout: (_) => data);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnakBar(
         SnackBar(content: Text('Yazdırma hatası: $e')),
       );
     }
@@ -799,7 +799,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ],
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildFileItem(String filePath, bool isFavorite) {
@@ -1158,7 +1159,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        systemNavigationBarColor: isDark ? const Color(0xFF424242) : Colors.white,
+        systemNavigationBarColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         statusBarColor: Colors.transparent, 
       ),
