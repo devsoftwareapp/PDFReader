@@ -2397,7 +2397,133 @@ if (typeof PDFViewerApplication !== 'undefined') {
         setTimeout(updateCustomToolbarLanguage, 500);
     });
 }
+
+<!--ek-->
+
+
+
+
+// FLUTTER WEB DOSYA SEÇİMİ FIX
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Flutter Web file picker fix loading...");
+    
+    // 5 saniye sonra çalıştır (tüm sayfanın yüklenmesini bekle)
+    setTimeout(function() {
+        fixFilePicker();
+    }, 5000);
+    
+    function fixFilePicker() {
+        console.log("Applying file picker fix...");
+        
+        // Custom Open butonunu bul
+        const customOpenBtn = document.getElementById('customOpen');
+        if (!customOpenBtn) {
+            console.log("Custom open button not found, retrying...");
+            setTimeout(fixFilePicker, 1000);
+            return;
+        }
+        
+        // Mevcut onclick event'ini kaydet
+        const originalOnClick = customOpenBtn.onclick;
+        
+        // Yeni click event'i ekle
+        customOpenBtn.addEventListener('click', function(e) {
+            console.log("Custom open button clicked");
+            
+            // Önce orijinal event'i çalıştır
+            if (originalOnClick) {
+                originalOnClick.call(this, e);
+            }
+            
+            // Flutter Web kontrolü
+            if (window.flutterWebRenderer || window.location.hostname === 'localhost') {
+                console.log("Flutter Web detected, creating fallback...");
+                
+                // 2 saniye bekle, PDF yüklenmediyse fallback çalıştır
+                setTimeout(function() {
+                    const viewer = document.getElementById('viewerContainer');
+                    const pdfView = document.querySelector('.pdfViewer');
+                    
+                    if ((viewer && viewer.children.length === 0) || 
+                        (pdfView && pdfView.children.length === 0)) {
+                        console.log("PDF not loaded, using fallback file picker");
+                        createFallbackFilePicker();
+                    }
+                }, 2000);
+            }
+        });
+        
+        console.log("File picker fix applied successfully");
+    }
+    
+    function createFallbackFilePicker() {
+        // Gizli file input oluştur
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.pdf,application/pdf';
+        fileInput.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            opacity: 0.001 !important;
+            cursor: pointer !important;
+            z-index: 9999999 !important;
+            font-size: 100px !important;
+        `;
+        
+        fileInput.onclick = function(e) {
+            e.stopPropagation();
+        };
+        
+        fileInput.onchange = function(e) {
+            if (this.files && this.files.length > 0) {
+                const file = this.files[0];
+                console.log("File selected:", file.name);
+                
+                // PDF.js'e yükle
+                if (typeof PDFViewerApplication !== 'undefined') {
+                    const fileURL = URL.createObjectURL(file);
+                    PDFViewerApplication.open(fileURL);
+                }
+            }
+            
+            // Input'u temizle ve kaldır
+            this.value = '';
+            setTimeout(() => {
+                if (this.parentNode) {
+                    this.parentNode.removeChild(this);
+                }
+            }, 100);
+        };
+        
+        // Body'ye ekle ve tıkla
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        
+        // 10 saniye sonra kaldır (güvenlik için)
+        setTimeout(() => {
+            if (fileInput.parentNode) {
+                fileInput.parentNode.removeChild(fileInput);
+            }
+        }, 10000);
+    }
+    
+    // PDF.js event'lerini de dinle
+    if (typeof PDFViewerApplication !== 'undefined') {
+        PDFViewerApplication.eventBus.on('fileinputchange', function() {
+            console.log("PDF.js file input changed - fix may have worked");
+        });
+        
+        PDFViewerApplication.eventBus.on('documentloaded', function() {
+            console.log("PDF loaded successfully");
+        });
+    }
+});
 </script>
+
+
     
         <!-- EV çiye   -->
          
