@@ -1,9 +1,8 @@
 import 'dart:ui';
-import 'package:flutter/foundation.dart';     
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,28 +28,29 @@ class _PdfTestPageState extends State<PdfTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: InAppWebView(
-        initialFile: "assets/web/index.html",
+      // 🔥 WebView’in status bar’a girmesini ENGELLİYORUZ!
+      body: SafeArea(
+        child: InAppWebView(
+          initialFile: "assets/web/index.html",
 
-        // 🔥 Flutter'ın dokunma engellemesini kaldırır → toolbar çalışır!
-        gestureRecognizers: {
-          Factory<OneSequenceGestureRecognizer>(
-            () => EagerGestureRecognizer(),
-          ),
-        },
+          // PDF.js toolbar’ın çalışması için gesture fix
+          gestureRecognizers: {
+            Factory<OneSequenceGestureRecognizer>(
+              () => EagerGestureRecognizer(),
+            ),
+          },
 
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            javaScriptEnabled: true,
-
-            // PDF.js worker + blob: URL için şart
-            allowFileAccessFromFileURLs: true,
-            allowUniversalAccessFromFileURLs: true,
-          ),
-          android: AndroidInAppWebViewOptions(
-            domStorageEnabled: true,
-            allowContentAccess: true,
-            useHybridComposition: true,
+          initialOptions: InAppWebViewGroupOptions(
+            crossPlatform: InAppWebViewOptions(
+              javaScriptEnabled: true,
+              allowFileAccessFromFileURLs: true,
+              allowUniversalAccessFromFileURLs: true,
+            ),
+            android: AndroidInAppWebViewOptions(
+              domStorageEnabled: true,
+              allowContentAccess: true,
+              useHybridComposition: true,
+            ),
           ),
         ),
       ),
