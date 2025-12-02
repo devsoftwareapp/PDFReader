@@ -22,10 +22,8 @@ dependencies:
   printing: ^5.11.0
   open_file: ^3.3.3
   flutter_email_sender: ^8.0.0
-  connectivity_plus: ^5.0.0
-  cached_network_image: ^3.3.0
-  sqflite: ^2.3.0
-
+  
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -41,24 +39,7 @@ flutter:
   uses-material-design: true
   
   assets:
-    # --- YENİ kutuphaneler ve lang.js ---
-    - assets/web/lang.js
-    - assets/web/franc.min.js
-    - assets/web/pdf-lib.min.js
-    - assets/web/pdf.min.js
-    - assets/web/tesseract.min.js
     
-    # --- YENİ TOOLS HTML DOSYALARI ---
-    - assets/web/birlestirme.html
-    - assets/web/imza.html
-    - assets/web/res_pdf.html
-    - assets/web/pdf_resim_ekle.html
-    - assets/web/sesli_okuma.html
-    - assets/web/ocr.html
-    - assets/web/pdf_res.html
-    - assets/web/pdf_metin_ekle.html
-    - assets/web/organize.html
-    - assets/web/sikistirma.html
 
     # PDFjs zorunlu dosyalari
     - assets/build/pdf.mjs
