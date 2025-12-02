@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Reader - Dosyalar</title>
+    <title>PDF Reader</title>
     <style>
         * {
             margin: 0;
@@ -15,177 +15,246 @@
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
         }
         
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 40px;
-            padding: 20px;
+            padding: 40px 20px 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         
         .header h1 {
-            font-size: 2.8rem;
+            font-size: 3rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
         }
         
         .header p {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             opacity: 0.9;
         }
         
         .add-pdf-btn {
             display: block;
-            width: 200px;
-            margin: 0 auto 30px;
-            padding: 15px 30px;
-            background: #4CAF50;
+            width: 220px;
+            margin: 0 auto 40px;
+            padding: 18px 35px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
             border: none;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
         }
         
         .add-pdf-btn:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.6);
         }
         
         .pdf-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 20px;
         }
         
         .pdf-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.3);
         }
         
         .pdf-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            background: white;
+        }
+        
+        .pdf-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            border-radius: 20px 20px 0 0;
         }
         
         .pdf-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
-            border-radius: 10px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: white;
-            font-size: 24px;
+            font-size: 28px;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
         }
         
         .pdf-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .pdf-path {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
             margin-bottom: 15px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
         
+        .pdf-info {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .pdf-info span {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
         .open-btn {
-            background: #2196F3;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 12px 25px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
         }
         
         .open-btn:hover {
-            background: #0b7dda;
+            background: linear-gradient(135deg, #1976D2, #1565C0);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.6);
         }
         
         .empty-state {
             text-align: center;
             color: white;
-            padding: 60px 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
+            padding: 80px 20px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 25px;
+            backdrop-filter: blur(15px);
+            margin: 50px auto;
+            max-width: 600px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .empty-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            opacity: 0.7;
+            font-size: 80px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
         }
         
         .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
-        .file-input {
-            display: none;
+        .empty-state p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .pdf-date {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .pdf-size {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 50px;
+            font-size: 1.2rem;
         }
         
         @media (max-width: 768px) {
             .pdf-list {
                 grid-template-columns: 1fr;
+                padding: 10px;
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Animasyonlar */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pdf-card {
+            animation: fadeIn 0.5s ease-out;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📚 PDF Reader</h1>
-            <p>Profesyonel PDF görüntüleyici ve yöneticisi</p>
-        </div>
-        
-        <button class="add-pdf-btn" onclick="openFilePicker()">
+    <div class="header">
+        <h1>📚 PDF Reader</h1>
+        <p>Profesyonel PDF görüntüleyici ve yöneticisi</p>
+        <button class="add-pdf-btn" onclick="pickPdfFile()">
             📄 PDF Dosyası Ekle
         </button>
-        
-        <input type="file" id="fileInput" class="file-input" accept=".pdf" multiple>
-        
+    </div>
+    
+    <div class="container">
         <div id="pdfList" class="pdf-list">
             <!-- PDF'ler buraya eklenecek -->
             <div class="empty-state" id="emptyState">
                 <div class="empty-icon">📂</div>
                 <h3>Henüz PDF dosyası yok</h3>
                 <p>"PDF Dosyası Ekle" butonuna tıklayarak başlayın</p>
+                <p class="pdf-info">Desteklenen: .pdf dosyaları</p>
             </div>
         </div>
     </div>
@@ -193,19 +262,28 @@
     <script>
         // PDF dosyalarını saklamak için dizi
         let pdfFiles = [];
+        let isLoading = false;
         
         // Local Storage'dan yükle
         function loadFromStorage() {
-            const stored = localStorage.getItem('pdfFiles');
-            if (stored) {
-                pdfFiles = JSON.parse(stored);
-                renderPdfList();
+            try {
+                const stored = localStorage.getItem('pdfFiles');
+                if (stored) {
+                    pdfFiles = JSON.parse(stored);
+                    renderPdfList();
+                }
+            } catch (e) {
+                console.error('Storage load error:', e);
             }
         }
         
         // Local Storage'a kaydet
         function saveToStorage() {
-            localStorage.setItem('pdfFiles', JSON.stringify(pdfFiles));
+            try {
+                localStorage.setItem('pdfFiles', JSON.stringify(pdfFiles));
+            } catch (e) {
+                console.error('Storage save error:', e);
+            }
         }
         
         // PDF listesini render et
@@ -215,124 +293,125 @@
             
             if (pdfFiles.length === 0) {
                 emptyState.style.display = 'block';
+                pdfList.innerHTML = '';
+                pdfList.appendChild(emptyState);
                 return;
             }
             
             emptyState.style.display = 'none';
             
+            // PDF kartlarını oluştur
             pdfList.innerHTML = '';
             
             pdfFiles.forEach((pdf, index) => {
                 const pdfCard = document.createElement('div');
                 pdfCard.className = 'pdf-card';
+                pdfCard.style.animationDelay = `${index * 0.1}s`;
+                
+                // Tarih formatı
+                const date = pdf.date ? new Date(pdf.date).toLocaleDateString('tr-TR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : 'Bilinmiyor';
+                
+                // Dosya boyutu formatı
+                const size = pdf.size ? formatFileSize(pdf.size) : 'Bilinmiyor';
+                
                 pdfCard.innerHTML = `
                     <div class="pdf-icon">📄</div>
                     <div class="pdf-name" title="${pdf.name}">${pdf.name}</div>
-                    <div class="pdf-path" title="${pdf.path}">${pdf.path}</div>
-                    <button class="open-btn" onclick="openPdf(${index})">Aç</button>
+                    <div class="pdf-info">
+                        <span>📅 <span class="pdf-date">${date}</span></span>
+                        <span>💾 <span class="pdf-size">${size}</span></span>
+                        <span>📍 ${pdf.path ? pdf.path.substring(0, 50) + '...' : 'Bilinmiyor'}</span>
+                    </div>
+                    <button class="open-btn" onclick="openPdf('${pdf.path}', '${pdf.name}')">
+                        📖 PDF'yi Aç
+                    </button>
                 `;
                 pdfList.appendChild(pdfCard);
             });
         }
         
-        // Dosya seçici aç
-        function openFilePicker() {
-            // Flutter'dan dosya seçimi iste
+        // Dosya boyutunu formatla
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 B';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Flutter'dan dosya seç
+        function pickPdfFile() {
             if (window.flutter_inappwebview) {
-                window.flutter_inappwebview.callHandler('openFilePicker', {})
-                    .then(result => {
-                        console.log('File picked:', result);
-                    })
-                    .catch(error => {
-                        console.error('File picker error:', error);
-                        // Fallback: Gizli file input
-                        document.getElementById('fileInput').click();
-                    });
+                window.flutter_inappwebview.callHandler('pickFile');
             } else {
-                // Fallback: Gizli file input
-                document.getElementById('fileInput').click();
+                console.log('Flutter WebView not detected');
+                alert('Lütbek bekleyin...');
             }
         }
         
         // Flutter'dan PDF eklemek için fonksiyon
-        window.addPdfFile = function(filePath, fileName) {
-            const newPdf = {
-                id: Date.now(),
-                name: fileName,
-                path: filePath,
-                date: new Date().toLocaleString('tr-TR')
-            };
+        window.addPdfFiles = function(filesArray) {
+            if (!Array.isArray(filesArray)) {
+                console.error('Invalid files array');
+                return { success: false, error: 'Invalid data' };
+            }
             
-            pdfFiles.unshift(newPdf);
+            filesArray.forEach(file => {
+                // Aynı dosya var mı kontrol et
+                const exists = pdfFiles.some(pdf => pdf.path === file.path);
+                if (!exists) {
+                    pdfFiles.unshift({
+                        id: Date.now() + Math.random(),
+                        name: file.name || 'Bilinmeyen Dosya',
+                        path: file.path,
+                        url: file.url,
+                        size: file.size || 0,
+                        date: file.date || new Date().toISOString()
+                    });
+                }
+            });
+            
             saveToStorage();
             renderPdfList();
             
-            return { success: true, message: 'PDF eklendi' };
+            return { success: true, count: filesArray.length };
         };
         
         // PDF aç
-        function openPdf(index) {
-            const pdf = pdfFiles[index];
+        function openPdf(pdfPath, pdfName) {
+            console.log('Opening PDF:', pdfName, pdfPath);
             
-            // Flutter WebView içinde
             if (window.flutter_inappwebview) {
-                // PDF'yi viewer.html ile aç
-                window.flutter_inappwebview.callHandler('openPdfViewer', {
-                    filePath: pdf.path,
-                    fileName: pdf.name
-                });
+                // Flutter'a PDF açma isteği gönder
+                window.flutter_inappwebview.callHandler('openPdf', pdfPath, pdfName);
             } else {
-                // Normal tarayıcıda
-                const viewerUrl = `viewer.html?file=${encodeURIComponent(pdf.path)}`;
+                // Normal tarayıcıda viewer.html ile aç
+                const viewerUrl = `viewer.html?file=${encodeURIComponent(pdfPath)}&name=${encodeURIComponent(pdfName)}`;
                 window.open(viewerUrl, '_blank');
             }
         }
         
-        // Gizli file input değiştiğinde
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            if (this.files.length > 0) {
-                for (let file of this.files) {
-                    const filePath = URL.createObjectURL(file);
-                    const fileName = file.name;
-                    
-                    const newPdf = {
-                        id: Date.now(),
-                        name: fileName,
-                        path: filePath,
-                        date: new Date().toLocaleString('tr-TR')
-                    };
-                    
-                    pdfFiles.unshift(newPdf);
-                }
-                
-                saveToStorage();
-                renderPdfList();
-                
-                // Input'u temizle
-                this.value = '';
-            }
-        });
-        
-        // Sayfa yüklendiğinde
-        document.addEventListener('DOMContentLoaded', function() {
-            loadFromStorage();
-            console.log('Index page loaded');
-            
-            // Flutter WebView kontrolü
+        // Flutter handler'larını ayarla
+        function setupFlutterHandlers() {
             if (window.flutter_inappwebview) {
-                console.log('Flutter WebView detected');
+                console.log('✅ Flutter WebView detected');
                 
-                // Flutter handler'larını ayarla
-                window.flutter_inappwebview.callHandler = function(handlerName, data) {
+                // Flutter için callHandler fonksiyonu
+                window.flutter_inappwebview.callHandler = function(handlerName, ...args) {
                     return new Promise((resolve, reject) => {
                         try {
-                            if (handlerName === 'openFilePicker') {
-                                // Flutter file picker'ı tetikle
-                                document.getElementById('fileInput').click();
+                            if (handlerName === 'pickFile') {
+                                // Dosya seçme isteği
+                                console.log('File picker requested');
                                 resolve({ success: true });
-                            } else if (handlerName === 'openPdfViewer') {
-                                // PDF'yi aç
-                                window.open(`viewer.html?file=${encodeURIComponent(data.filePath)}`, '_blank');
+                            } else if (handlerName === 'openPdf') {
+                                // PDF açma isteği
+                                console.log('Open PDF requested:', args);
                                 resolve({ success: true });
                             } else {
                                 reject(new Error(`Handler ${handlerName} not found`));
@@ -343,7 +422,37 @@
                     });
                 };
             }
+        }
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📱 Index page loaded');
+            
+            setupFlutterHandlers();
+            loadFromStorage();
+            
+            // 3 saniye sonra Flutter'dan PDF'leri iste
+            setTimeout(() => {
+                if (window.flutter_inappwebview) {
+                    console.log('Requesting PDF files from Flutter...');
+                }
+            }, 3000);
+            
+            // Tıklama efekti
+            document.querySelectorAll('.pdf-card, .add-pdf-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
         });
+        
+        // Çevrimdışı mod mesajı
+        if (!navigator.onLine) {
+            console.log('⚠️ Offline mode');
+        }
     </script>
 </body>
 </html>
