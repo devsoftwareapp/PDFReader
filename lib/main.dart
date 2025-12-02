@@ -1,3 +1,5 @@
+import 'dart:ui';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -27,11 +29,19 @@ class _PdfTestPageState extends State<PdfTestPage> {
     return Scaffold(
       body: InAppWebView(
         initialFile: "assets/web/index.html",
+
+        // 🔥 Flutter'ın dokunma engellemesini kaldırır → toolbar çalışır!
+        gestureRecognizers: {
+          Factory<OneSequenceGestureRecognizer>(
+            () => EagerGestureRecognizer(),
+          ),
+        },
+
         initialOptions: InAppWebViewGroupOptions(
           crossPlatform: InAppWebViewOptions(
             javaScriptEnabled: true,
 
-            // PDF.js worker için gerekli
+            // PDF.js worker + blob: URL için şart
             allowFileAccessFromFileURLs: true,
             allowUniversalAccessFromFileURLs: true,
           ),
