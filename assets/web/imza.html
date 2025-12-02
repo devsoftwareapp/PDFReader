@@ -3,7 +3,62 @@
 <html dir="ltr" mozdisallowselectionprint>
   <head>
           
+
+
+
+
 <style>
+/* ORİJİNAL PDF.JS TOOLBAR'INI GİZLE */
+.toolbar, 
+#toolbarContainer, 
+#loadingBar, 
+#sidebarToggleButton, 
+#viewFindButton, 
+#secondaryToolbarToggle,
+#editorModeButtons,
+#toolbarViewer,
+#toolbarSidebar {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Toolbar ve sidebar container'larını tamamen gizle */
+#outerContainer > .toolbar,
+#mainContainer > .toolbar {
+    display: none !important;
+}
+
+/* Viewer container'ı tam ekran yap */
+#viewerContainer {
+    top: 0 !important;
+    height: calc(100vh - 70px) !important;
+    bottom: 70px !important;
+    position: absolute !important;
+}
+
+/* Main container'ı ayarla */
+#mainContainer {
+    height: 100vh !important;
+    position: relative !important;
+}
+
+/* Outer container'ı ayarla */
+#outerContainer {
+    height: 100vh !important;
+}
+
+/* PDF sayfalarının görünümünü düzenle */
+.pdfViewer .page {
+    margin: 10px auto !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
 /* MERKEZ BUTTON STİLLERİ */
 .center-start-button {
     position: fixed;
@@ -137,13 +192,6 @@
     100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* PDF viewer'ı toolbar için ayarla - AŞAĞIDA */
-#viewerContainer {
-    top: 0 !important;
-    height: calc(100vh - 70px) !important;
-    bottom: 70px !important;
-}
-
 /* Mobil için responsive */
 @media (max-width: 480px) {
     .center-start-button {
@@ -182,8 +230,33 @@
 /* Arka planı daha temiz göster */
 body {
     background: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Print ve download butonlarını da gizle */
+#printButton,
+#downloadButton,
+#secondaryPrint,
+#secondaryDownload {
+    display: none !important;
+}
+
+/* Horizontal toolbar separators */
+.verticalToolbarSeparator,
+.splitToolbarButtonSeparator {
+    display: none !important;
+}
+
+/* Dropdown toolbar butonlarını gizle */
+.dropdownToolbarButton,
+#scaleSelectContainer {
+    display: none !important;
 }
 </style>
+
+
 
 
 
@@ -1341,7 +1414,7 @@ body {
     
     
     
-<script>
+    <script>
 // Lang.js yüklenmesini bekleyen fonksiyon
 function waitForLangJS(callback) {
     if (typeof languageConfig !== 'undefined') {
@@ -1542,7 +1615,7 @@ const translationData = {
         'save': 'সংরক্ষণ করুন',
         'center_button': 'স্বাক্ষর করতে PDF<br>নির্বাচন করুন',
         'draw_mode': '🎨 আঁকার মোড - আপনি স্বাক্ষর করতে পারেন',
-        'move_mode': '✋ সরানোর মোড - আপনি স্বাক্ষর সরাতে পারেন',
+        'move_mode': '✋ সরানোর মोড - আপনি স্বাক্ষর সরাতে পারেন',
         'saving': 'PDF সংরক্ষণ করা হচ্ছে...',
         'saved': 'PDF সফলভাবে সংরক্ষণ করা হয়েছে!',
         'save_error': 'PDF সংরক্ষণ করতে ব্যর্থ!'
@@ -1632,8 +1705,8 @@ function saveToFlutter(fileData, fileName) {
     return false;
 }
 
-// PDF kaydetme fonksiyonu
-function savePDF() {
+// PDF kaydetme fonksiyonu - DÜZELTİLMİŞ VERSİYON
+async function savePDF() {
     const currentLang = languageConfig.getCurrent();
     const translations = translationData[currentLang] || translationData['en'];
     
@@ -1649,28 +1722,42 @@ function savePDF() {
             throw new Error('PDF document not found');
         }
         
-        // PDF'yi data URL olarak al
-        const pdfData = PDFViewerApplication.pdfDocument;
-        const pdfFile = pdfData ? pdfData.getData() : null;
+        // PDF'yi byte array olarak al
+        const pdfData = await pdfDocument.saveDocument();
         
-        if (pdfFile) {
+        if (pdfData) {
             // Flutter'a kaydetmeyi dene
             const fileName = 'signed_document_' + new Date().getTime() + '.pdf';
-            const flutterSuccess = saveToFlutter(pdfFile, fileName);
+            const flutterSuccess = saveToFlutter(pdfData, fileName);
             
             if (flutterSuccess) {
                 console.log('PDF Flutter\'a gönderildi');
                 showModeIndicator(translations.saved);
+                return true;
             } else {
                 // Flutter yoksa normal tarayıcı download
                 console.log('Flutter bulunamadı, normal download kullanılıyor');
-                const saveBtn = document.getElementById('downloadButton');
-                if (saveBtn) {
-                    saveBtn.click();
-                    showModeIndicator(translations.saved);
-                } else {
-                    throw new Error('Download button not found');
-                }
+                
+                // Blob oluştur
+                const blob = new Blob([pdfData], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                
+                // Download linki oluştur
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Temizlik
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+                showModeIndicator(translations.saved);
+                return true;
             }
         } else {
             throw new Error('PDF data not available');
@@ -1678,6 +1765,20 @@ function savePDF() {
     } catch (error) {
         console.error('PDF kaydetme hatası:', error);
         showModeIndicator(translations.save_error);
+        return false;
+    }
+}
+
+// Mode indicator gösterme fonksiyonu
+function showModeIndicator(text) {
+    const modeIndicator = document.querySelector('.mode-indicator');
+    if (modeIndicator) {
+        modeIndicator.textContent = text;
+        modeIndicator.style.display = 'block';
+        
+        setTimeout(() => {
+            modeIndicator.style.display = 'none';
+        }, 3000);
     }
 }
 
@@ -1697,8 +1798,17 @@ window.addEventListener('load', function() {
         console.log('Lang.js yüklendi, mevcut dil:', languageConfig.getCurrent());
         
         let isDrawingMode = false;
-        let modeIndicator = null;
         let pdfLoaded = false;
+        
+        // Mod göstergesi oluştur
+        function createModeIndicator() {
+            const existingIndicator = document.querySelector('.mode-indicator');
+            if (!existingIndicator) {
+                const modeIndicator = document.createElement('div');
+                modeIndicator.className = 'mode-indicator';
+                document.body.appendChild(modeIndicator);
+            }
+        }
         
         function initApplication() {
             console.log('Uygulama başlatılıyor...');
@@ -1722,21 +1832,6 @@ window.addEventListener('load', function() {
             }
             
             console.log('Uygulama hazır!');
-        }
-        
-        function createModeIndicator() {
-            modeIndicator = document.createElement('div');
-            modeIndicator.className = 'mode-indicator';
-            document.body.appendChild(modeIndicator);
-        }
-        
-        function showModeIndicator(text) {
-            modeIndicator.textContent = text;
-            modeIndicator.style.display = 'block';
-            
-            setTimeout(() => {
-                modeIndicator.style.display = 'none';
-            }, 3000);
         }
         
         function openPDFFile() {
@@ -1810,7 +1905,7 @@ window.addEventListener('load', function() {
             if (customSave) {
                 customSave.onclick = function() {
                     console.log('KAYDET butonuna tıklandı');
-                    savePDF(); // Özel kaydetme fonksiyonunu kullan
+                    savePDF();
                 };
             }
             
@@ -1934,9 +2029,101 @@ window.addEventListener('load', function() {
         }
     });
 });
+
+// Orijinal PDF.js toolbar'ını gizle
+function hideOriginalToolbar() {
+    // Tüm orijinal toolbar elementlerini bul ve gizle
+    const selectors = [
+        '.toolbar',
+        '#toolbarContainer',
+        '#loadingBar',
+        '#sidebarToggleButton',
+        '#viewFindButton',
+        '#secondaryToolbarToggle',
+        '#editorModeButtons',
+        '#toolbarViewer',
+        '#toolbarSidebar',
+        '#toolbarViewerLeft',
+        '#toolbarViewerMiddle',
+        '#toolbarViewerRight',
+        '#secondaryToolbar',
+        '#findbar',
+        '#scaleSelectContainer',
+        '#pageNumber',
+        '#numPages',
+        '#zoomOutButton',
+        '#zoomInButton',
+        '#previous',
+        '#next',
+        '#printButton',
+        '#downloadButton',
+        '#secondaryPrint',
+        '#secondaryDownload'
+    ];
+    
+    selectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+            if (element) {
+                element.style.display = 'none';
+                element.style.visibility = 'hidden';
+                element.style.opacity = '0';
+                element.style.height = '0';
+                element.style.minHeight = '0';
+                element.style.overflow = 'hidden';
+                element.style.pointerEvents = 'none';
+            }
+        });
+    });
+    
+    // Viewer container'ı tam ekran yap
+    const viewerContainer = document.getElementById('viewerContainer');
+    if (viewerContainer) {
+        viewerContainer.style.top = '0';
+        viewerContainer.style.height = 'calc(100vh - 70px)';
+        viewerContainer.style.bottom = '70px';
+    }
+}
+
+// Sayfa yüklendiğinde toolbar'ı gizle
+document.addEventListener('DOMContentLoaded', function() {
+    hideOriginalToolbar();
+    
+    // Mutation observer ile dinamik eklenen elementleri de gizle
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                setTimeout(hideOriginalToolbar, 100);
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    // Her 500ms'de bir kontrol et
+    setInterval(hideOriginalToolbar, 500);
+});
+
+// PDF.js yüklendiğinde de toolbar'ı gizle
+if (typeof PDFViewerApplication !== 'undefined') {
+    PDFViewerApplication.eventBus.on('documentloaded', hideOriginalToolbar);
+    PDFViewerApplication.eventBus.on('pagesloaded', hideOriginalToolbar);
+}
 </script>
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+
     
     
     
